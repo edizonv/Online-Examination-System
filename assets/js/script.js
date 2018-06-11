@@ -9,6 +9,8 @@ $(function() {
 
 
 
+
+
 	$( ".autocomplete" ).typeahead({	/*	gawing typeahead yung autocomplete	*/
 		items: 10,	//no. of records to display.
 		source: function(request, response) {
@@ -230,5 +232,8 @@ $(function() {
 	} else {
 		$('#hiddenChoice').val(nextChoice)
 	}
+
+
+	
 
 });

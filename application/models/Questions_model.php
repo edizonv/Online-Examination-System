@@ -116,10 +116,9 @@ class Questions_model extends CI_Model {
     return $getQuestionsById;
   }
 
-  function getQuestionsByIdByExaminer($id) {
+  function getQuestionsByIdByExaminer($id, $limit, $page) {
     $getQuestionsByIdByExaminer = $this->db
-      ->query("SELECT DISTINCT t.topic_id AS id,
-        t.topic_title AS title,
+      ->query("SELECT DISTINCT t.topic_id AS id, t.topic_title AS title,
         t.topic_date_added AS dateAdded,
         t.topic_status AS status,
         q.question_no AS no,
@@ -127,21 +126,58 @@ class Questions_model extends CI_Model {
         q.question_status AS qstat,
         c.choice_choice AS choices,
         c.choice_type AS type,
+        e.examiner_topic_date_taken AS dateTaken,
+        e.examiner_remaining_time AS remainingTime,
         c.choice_text AS choicesText,
         a.answer_answer AS answer
-        FROM $this->topicsTable AS t
-        LEFT JOIN $this->questionsTable AS q ON t.topic_id = q.question_id
-        LEFT JOIN $this->choicesTable AS c ON q.question_no = c.question_no
-        LEFT JOIN $this->answersTable AS a ON c.question_no = a.question_no
-        WHERE t.topic_id = $id && q.question_status = 1")
+        FROM oes_topics AS t
+        LEFT JOIN oes_questions AS q ON t.topic_id = q.question_id
+        LEFT JOIN oes_choices AS c ON q.question_no = c.question_no
+        LEFT JOIN oes_answers AS a ON c.question_no = a.question_no
+        LEFT JOIN oes_examiners AS e ON t.topic_id = e.examiner_id
+        WHERE t.topic_id = 1 && q.question_status = 1 && c.choice_id = 1 GROUP BY q.question_question ORDER BY q.question_question DESC LIMIT $page, $limit")
       ->result();
 
     return $getQuestionsByIdByExaminer;
   }
 
+  function countQuestionsByIdByExaminer($id) {
+    $countQuestionsByIdByExaminer = $this->db
+      ->query("SELECT DISTINCT t.topic_id AS id, t.topic_title AS title,
+        t.topic_date_added AS dateAdded,
+        t.topic_status AS status,
+        q.question_no AS no,
+        q.question_question AS questions,
+        q.question_status AS qstat,
+        c.choice_choice AS choices,
+        c.choice_type AS type,
+        e.examiner_topic_date_taken AS dateTaken,
+        e.examiner_remaining_time AS remainingTime,
+        c.choice_text AS choicesText,
+        a.answer_answer AS answer
+        FROM oes_topics AS t
+        LEFT JOIN oes_questions AS q ON t.topic_id = q.question_id
+        LEFT JOIN oes_choices AS c ON q.question_no = c.question_no
+        LEFT JOIN oes_answers AS a ON c.question_no = a.question_no
+        LEFT JOIN oes_examiners AS e ON t.topic_id = e.examiner_id
+        WHERE t.topic_id = 1 && q.question_status = 1 && c.choice_id = 1 GROUP BY q.question_question ORDER BY q.question_question DESC")
+      ->num_rows();
+
+    return $countQuestionsByIdByExaminer;
+  }
+
+
+  function getQuestionsByQuestionID($id) {
+    $getQuestionsByQuestionID = $this->db
+      ->query("SELECT question_no AS no, choice_choice AS choice, choice_text AS choices FROM oes_choices")
+      ->result();
+
+    return $getQuestionsByQuestionID;
+  }
+
   function getTopicById($id) {
     $getTopicInfoById = $this->db
-      ->select('topic_title AS title, topic_status AS status')
+      ->select('topic_title AS title, topic_status AS status, topic_duration AS duration')
       ->from($this->topicsTable)
       ->where('topic_id', $id)
       ->get()
@@ -306,6 +342,46 @@ class Questions_model extends CI_Model {
       ];
    
     $updateExaminersList = $this->db->delete($this->examinersTable, $where);
+  }
+
+  function add_duration($data = []) {
+    $set = [
+      'topic_duration'  =>  $data['duration']
+    ];
+    $where = [
+      'topic_id'  =>  $data['hiddenID']
+    ];
+    $add_duration = $this->db->where($where)->update($this->topicsTable, $set);
+
+    return $add_duration;
+  }
+
+  function updateExamDateTaken($topicId, $date, $userId) {
+    $where =[
+      'examiner_topics' =>  $topicId,
+      'examiner_id' =>  $userId
+    ];
+
+    $set =[
+      'examiner_topic_date_taken' =>  $date
+    ];
+    $updateExamDateTaken = $this->db->where($where)->update($this->examinersTable, $set);
+
+    return $updateExamDateTaken;
+  }
+
+  function updateRemainingTime($topicId, $remainingTime, $userId) {
+     $where =[
+      'examiner_topics' =>  $topicId,
+      'examiner_id' =>  $userId
+    ];
+
+    $set =[
+      'examiner_remaining_time' =>  $remainingTime
+    ];
+    $updateRemainingTime = $this->db->where($where)->update($this->examinersTable, $set);
+
+    return $updateRemainingTime;
   }
 
 }

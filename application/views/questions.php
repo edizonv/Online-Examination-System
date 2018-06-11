@@ -13,6 +13,9 @@
 		<?php if($this->session->flashdata('questionAdded') ): ?>
 			<?php echo $this->session->flashdata('questionAdded'); ?>
 		<?php endif;?>
+		<?php if($this->session->flashdata('invalidId') ): ?>
+			<?php echo $this->session->flashdata('invalidId'); ?>
+		<?php endif;?>
 		<div class="table-responsive">
 			<table class="table table-hover table-bordered">
 				<thead>
@@ -22,20 +25,21 @@
 							<th class="text-center">Passed</th>
 							<th class="text-center">Failed</th>
 						<?php else: ?>
-							<th class="text-center">Status</th>
+							<th class="text-center">Start Date</th>
 						<?php endif; ?>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach($allTopics as $item): ?>
 						<?php if($item->status == 1 && $this->session->userdata('userPositionSessId') == 1): // if examiner level ?>
-							<tr onclick="window.location = '/questions/takenow/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+							<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+							
 								<td class="col-md-8"><?php echo $item->title ?></td>
 								<?php if($this->session->userdata('userPositionSessId') == 0): ?>
 									<td class="text-center">1</td>
 									<td class="text-center">2</td>
 								<?php else: ?>
-									<td class="text-center"><?php if($item->estatus == 0): ?>N/A <?php else: ?>DONE<?php endif; ?></td>
+									<td class="text-center"><?php if($this->session->userdata('startDate') ): ?><?php echo $this->session->userdata('startDate'); ?> <?php else: ?>DONE<?php endif; ?></td>
 								<?php endif; ?>
 							</tr>
 						<?php elseif($this->session->userdata('userPositionSessId') == 0): // if admin level ?>

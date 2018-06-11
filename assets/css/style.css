@@ -113,6 +113,17 @@ ul li {
     padding: 30px 15px 20px;
 }
 
+
+.pagination {
+  margin-top: 0;
+  margin: 0 auto;
+  display: table;
+}
+
+.hidden {
+  display: none;
+}
+
 .panel-default>.panel-footer {
     background: #fff;
     padding: 20px 30px 30px;
@@ -525,6 +536,19 @@ label {
   margin-right: 10px;
   position: relative;
   top: 3px;
+}
+
+
+#topicInfo .fa {
+  margin-right: 5px;
+}
+
+#demo {
+  font-weight: bold;
+}
+
+#demo:before {
+  content: "Time Left : ";
 }
 
 @media screen and (max-width:991px) {

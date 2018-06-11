@@ -1,10 +1,11 @@
 <?php if($this->session->userdata('userPositionSessId') == 0): // admin only ?>
 <div class="panel panel-primary<?php if($topic->status == 0) echo " disable";  ?>" id="topicInfo">
-	<div class="panel-heading text-uppercase"><strong><?php echo $topic->title ?></strong>
+	<div class="panel-heading text-uppercase"><strong><?php echo $topic->title . ' (' . $topic->duration.')'; ?></strong>
 	<div class="dropdown pull-right">
 	  <a class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">ACTION <span class="caret"></span></a>
 	  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
 	  	<?php if($questions[0]->status): ?>
+		    <li><a href="#" class="white" data-toggle="modal" data-target="#durationModal"><i class="fa fa-plus"></i> ADD DURATION</a></li>
 		    <li><a href="#" class="white" data-toggle="modal" data-target="#newQuestionModal"><i class="fa fa-plus"></i> NEW QUESTION</a></li>
 		    <li><a href="#" class="white" data-toggle="modal" data-target="#newExaminersModal"><i class="fa fa-plus"></i> ADD EXAMINER</a></li>
 	    	<li class="divider"></li>
@@ -28,6 +29,11 @@
 			<div class="col-md-12">
 				<?php if($this->session->flashdata('updateExaminersByTopic') ): ?>
 					<?php echo $this->session->flashdata('updateExaminersByTopic'); ?>
+				<?php endif;?>
+			</div>
+			<div class="col-md-12">
+				<?php if($this->session->flashdata('durationAdded') ): ?>
+					<?php echo $this->session->flashdata('durationAdded'); ?>
 				<?php endif;?>
 			</div>
 			<div class="col-md-12">
@@ -61,6 +67,55 @@
 </div>
 
 <!-- Modal -->
+
+<div id="durationModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h5 class="modal-title">ADD DURATION</h5>
+      </div>
+      <div class="modal-body">
+        <form action="/questions/add_duration" method="POST" Class="form-inline">
+        	<div class="row">
+	        	<div class="form-group col-md-4">
+	        		<label>
+	        			HOURS : 
+		        		<select name="hours" class="form-control">
+		        			<?php for($x = 1; $x <= 59; $x++): ?>
+		        				<option value="<?php echo str_pad($x, 2, '0', STR_PAD_LEFT); ?>"><?php echo str_pad($x, 2, '0', STR_PAD_LEFT); ?></option>
+		        			<?php endfor; ?>
+		        		</select>
+	        		</label>
+	        	</div>
+	        	<div class="form-group col-md-4 text-left">
+	        		<label>
+	        			MINUTES : 
+		        		<select name="minutes" class="form-control">
+		        			<?php for($x = 0; $x <= 59; $x++): ?>
+		        				<option value="<?php echo str_pad($x, 2, '0', STR_PAD_LEFT); ?>"><?php echo str_pad($x, 2, '0', STR_PAD_LEFT); ?></option>
+		        			<?php endfor; ?>
+		        		</select>
+	        		</label>
+	        	</div>
+	        	<div class="col-md-4 text-right">
+		        	<div class="form-group">
+		        		<input type="hidden" name="hiddenID" id="hiddenID" value="<?php echo $this->uri->segment(3); ?>">
+		        		<button class="btn btn-primary">Submit</button>
+		        	</div>
+	        	</div>
+        	</div>
+        	
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
 <div id="newQuestionModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
 

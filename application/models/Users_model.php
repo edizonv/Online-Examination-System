@@ -106,12 +106,13 @@ class Users_model extends CI_Model {
     return $getAllExaminers;
   }
 
-  function getAllExaminersById() {
+  function getAllExaminersById($id) {
     $getAllExaminersById = $this->db
       ->select('u.user_id AS id, u.user_name AS name')
       ->from($this->usersTable . ' AS u')
       ->join($this->examinersTable . ' AS e', 'u.user_id = e.examiner_id')
       ->where('u.user_position !=', 0)
+      ->where('e.examiner_topics', $id)
       ->get()
       ->result();
     return $getAllExaminersById;

@@ -1,8 +1,8 @@
-<script src="<?php echo base_url().'assets/js/jquery.min.js' ?>"></script>
+
 <script src="https://apis.google.com/js/client:platform.js?onload=renderButton" async defer></script>
 <script src="<?php echo base_url().'assets/bootstrap/js/bootstrap.min.js' ?>"></script>
 <script src="<?php echo base_url().'assets/js/bootstrap-typeahead.js' ?>"></script>
-<script src="<?php echo base_url().'assets/js/script.js' ?>"></script>
+
 <script>
 function onSuccess(googleUser) {
   var profile = googleUser.getBasicProfile();
@@ -58,5 +58,6 @@ function signOut() {
   });
 }
 </script>
+<script src="<?php echo base_url().'assets/js/script.js' ?>"></script>
 </body>
 </html>

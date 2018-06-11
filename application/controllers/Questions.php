@@ -18,8 +18,9 @@ class Questions extends CI_Controller {
   }
     
   function home() {
-      $this->template->set('title', 'Home');
-	$this->template->load('template', 'home');
+
+    $this->template->set('title', 'Home');
+	   $this->template->load('template', 'home');
   }
 
   function all() {  		
@@ -85,7 +86,7 @@ class Questions extends CI_Controller {
 		echo $results->num_rows();
   }
 
-   function ifChoiceExist() {
+  function ifChoiceExist() {
   	$data = $this->input->post();
 		$results = $this->Questions_model->ifChoiceExist($data);
 		echo $results->num_rows();
@@ -93,7 +94,7 @@ class Questions extends CI_Controller {
 
   function manage($id) {
     
-    $results['examiners'] = $this->Users_model->getAllExaminersById();
+    $results['examiners'] = $this->Users_model->getAllExaminersById($id);
 
   	$results['questions'] = $this->Questions_model->getQuestionsById($id);
   	$results['topic'] = $this->Questions_model->getTopicById($id);
@@ -266,14 +267,98 @@ class Questions extends CI_Controller {
     }
      $this->Questions_model->insertExaminers($data, $examiners);
      $this->session->set_flashdata('updateExaminersByTopic', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Topic Examiners updated!</div>');
-      redirect($_SERVER['HTTP_REFERER']);
+    redirect($_SERVER['HTTP_REFERER']);
   }
 
-  function takenow($id) {
-    $data['topic'] = $this->Questions_model->getTopicById($id);
-    $data['questions'] = $this->Questions_model->getQuestionsByIdByExaminer($id);
+  function logstart($id) {
+    $this->session->set_userdata('start', '1');
+    $this->session->set_userdata('topicid', $id);
+    date_default_timezone_set('Asia/Manila');
+    $this->session->set_userdata('startDate', date("m d Y G:i:s") );
 
-    $this->template->set('title', 'Take Exam');
-    $this->template->load('template', 'takenow', $data);
+  
+
+    if (!$this->session->userdata('start') ) {
+      $this->Questions_model->updateExamDateTaken($id, date("M d Y G:i:s"), $this->session->userdata('userIDSess'));
+    }
+    redirect(base_url().'questions/instructions/'.$id); 
+  }
+
+  function updateRemainingTime() {
+     $this->Questions_model->updateRemainingTime($this->input->post('topicId'), $this->input->post('duration'), $this->session->userdata('userIDSess'));
+  }
+
+
+  function takenow($id) {
+    if($this->session->userdata('topicid') == $id) {
+
+      $this->load->library('pagination');
+      $config['full_tag_open']    =   "<ul class='pagination'>";
+      $config['full_tag_close']   =   "</ul>";
+      $config['num_tag_open']     =   '<li class="hidden">';
+      $config['num_tag_close']    =   '</li>';
+      $config['cur_tag_open']     =   "<li class='disabled'><li class='active hidden'><a href='#'>";
+      $config['cur_tag_close']    =   "<span class='sr-only'></span></a></li>";
+      $config['next_tag_open']    =   "<li>";
+      $config['next_tagl_close']  =   "</li>";
+      $config['prev_tag_open']    =   "<li class='hidden'>";
+      $config['prev_tagl_close']  =   "</li>";
+      $config['first_tag_open']   =   "<li class='hidden'>";
+      $config['first_tagl_close'] =   "</li>";
+      $config['last_tag_open']    =   "<li class='hidden'>";
+      $config['last_tagl_close']  =   "</li>";
+      //For NEXT PAGE Setup
+      $config['next_link'] = 'Next';
+      $config['next_tag_open'] = '<li>';
+      $config['next_tag_close'] = '</li>';
+
+      $config["base_url"] = base_url() . "Questions/takenow/".$id."/";
+      $config["total_rows"] = $this->Questions_model->countQuestionsByIdByExaminer($id);
+      $config["per_page"] = 1;
+      $config['uri_segment'] = 4;
+      $limit = $config['per_page'];
+
+      $this->pagination->initialize($config);
+
+      $page = ($this->uri->segment(4)) ? $this->uri->segment(4) : 0;
+
+      $data["links"] = $this->pagination->create_links();
+
+      $data['topic'] = $this->Questions_model->getTopicById($id);
+      $data['getChoices'] = $this->Questions_model->getQuestionsByQuestionID($id);
+      $data['questions'] = $this->Questions_model->getQuestionsByIdByExaminer($id, $limit, $page);
+
+
+      $this->template->set('title', 'Take Exam');
+      $this->template->load('template', 'takenow', $data);
+    } else {
+      $this->session->set_flashdata('invalidId', '<div class="alert alert-danger"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Invalid Exam!</div>');
+      redirect(base_url().'questions/all'); 
+    }
+  }
+
+  function instructions($id) {
+
+    if ($this->session->userdata('start') ) {
+      redirect(base_url().'questions/takenow/'.$id); 
+      exit;
+    }
+
+    $data['topic'] = $this->Questions_model->getTopicById($id);
+    $this->template->set('title', 'Read first before taking exam');
+    $this->template->load('template', 'instructions', $data);
+  }
+
+  function add_duration() {
+    $formData = $this->input->post();
+    $data['hiddenID'] = $formData['hiddenID'];
+    $data['duration'] = $formData['hours'] . ':' . $formData['minutes'];
+    if ($this->Questions_model->add_duration($data) ) {
+      $this->session->set_flashdata('durationAdded', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Duration Added!</div>');
+      redirect($_SERVER['HTTP_REFERER']);
+    }
+
+    
+
   }
 }
