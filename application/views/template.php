@@ -16,7 +16,7 @@
 					<?php endif; ?>
 					<a href="#" class="list-group-item"><i class="fa fa-folder"></i> Reports</a>
 					<a href="#" class="list-group-item"><i class="fa fa-lock"></i> Change Password</a>
-					<a href="#" class="list-group-item"><i class="fa fa-power-off"></i> Logout</a>
+					<a href="/users/logout" class="list-group-item"><i class="fa fa-power-off"></i> Logout</a>
 				</div>
 			</div>
 		<?php endif; ?>

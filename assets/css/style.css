@@ -551,6 +551,10 @@ label {
   content: "Time Left : ";
 }
 
+td {
+  vertical-align: middle!important;
+}
+
 @media screen and (max-width:991px) {
   .navbar-default form {
     float: right;

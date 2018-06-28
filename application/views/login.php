@@ -41,10 +41,10 @@
     </div>
 </div>
 <script>
-document.getElementById("enableUserBtn").disabled = true;
+// document.getElementById("enableUserBtn").disabled = true;
 
-function enableUserBtn(){
-    document.getElementById("enableUserBtn").disabled = false;
-}
+// function enableUserBtn(){
+//     document.getElementById("enableUserBtn").disabled = false;
+// }
 
 </script>

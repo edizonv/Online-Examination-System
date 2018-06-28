@@ -35,15 +35,16 @@
         </div>
       </div>
       
-      <?php if($this->session->userdata('userSessId') ): ?>
+      <?php if($this->session->userdata('userSessId') && !$this->session->userdata('start') ): ?>
         <form action="/questions/redirect" method="POST">
           <div class="col-md-5 search">
-            <input type="text" name="term" autocomplete="off" id="term" class="form-control autocomplete" placeholder="Search for question or user" required>
+            <input type="text" name="term" autocomplete="off" id="term" class="form-control autocomplete" placeholder="Search for topics" required>
             <button><i class="fa fa-search"></i></button>
           </div>
         </form>
       <?php endif; ?>
-
+  
+      <?php if($this->session->userdata('userSessId') && !$this->session->userdata('start') ): ?>
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav navbar-right">
@@ -67,6 +68,7 @@
           <?php endif; ?>
         </ul>
       </div><!-- /.navbar-collapse -->
+    <?php endif; ?>
     </div>
   </div><!-- /.container-fluid -->
 </nav>

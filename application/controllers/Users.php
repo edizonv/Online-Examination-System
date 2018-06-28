@@ -1,15 +1,12 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-
 class Users extends CI_Controller {
 
 	function __construct() {
 		parent::__construct();
-		
 		if ($this->uri->segment(2) != "logout" && $this->session->userdata('userSessId') != "" ) {
 			redirect(base_url() );
 		}
-	
 		$this->load->model('Users_model');
 	}
 
@@ -69,7 +66,6 @@ class Users extends CI_Controller {
 	function logout() {
 		$this->session->sess_destroy();
 		$this->session->unset_userdata('userSessId');
-
 		redirect(base_url().'users/login' );
 	}
 

@@ -44,7 +44,7 @@ class Questions extends CI_Controller {
 		$config["total_rows"] = $this->Questions_model->countAllTopics()->num_rows();
 		$config["per_page"] = 15;
 		$config['uri_segment'] = 3;
-
+    $data['totalQ'] = $config["total_rows"];
 		$limit = $config['per_page'];
 
 		$this->pagination->initialize($config);
@@ -64,8 +64,12 @@ class Questions extends CI_Controller {
   }
 
   function autocomplete_search() {
-  	$term = $this->input->post('term');
-		$results = $this->Questions_model->autocompleteSearch($term);
+		$term = $this->input->post('term');
+		if($this->session->userdata('userPositionSessId') == 0) {
+			$results = $this->Questions_model->autocompleteSearch($term);
+		} else {
+			$results = $this->Questions_model->examinerAutocompleteSearch($term, $this->session->userdata('userIDSess') );	
+		}
 		$json_array = array();
 		foreach($results as $rows) {
 			array_push($json_array, $rows->title);
@@ -93,12 +97,9 @@ class Questions extends CI_Controller {
   }
 
   function manage($id) {
-    
     $results['examiners'] = $this->Users_model->getAllExaminersById($id);
-
   	$results['questions'] = $this->Questions_model->getQuestionsById($id);
   	$results['topic'] = $this->Questions_model->getTopicById($id);
-
   	$this->template->set('title', 'Mangage Questionnaires');
 		$this->template->load('template', 'manage', $results);
   }
@@ -271,27 +272,51 @@ class Questions extends CI_Controller {
   }
 
   function logstart($id) {
-    $this->session->set_userdata('start', '1');
+    
     $this->session->set_userdata('topicid', $id);
     date_default_timezone_set('Asia/Manila');
     $this->session->set_userdata('startDate', date("m d Y G:i:s") );
-
-  
-
     if (!$this->session->userdata('start') ) {
       $this->Questions_model->updateExamDateTaken($id, date("M d Y G:i:s"), $this->session->userdata('userIDSess'));
     }
-    redirect(base_url().'questions/instructions/'.$id); 
+    $this->session->set_userdata('start', '1');
+    redirect(base_url().'questions/instructions/'.$id);
   }
 
-  function updateRemainingTime() {
-     $this->Questions_model->updateRemainingTime($this->input->post('topicId'), $this->input->post('duration'), $this->session->userdata('userIDSess'));
+  function redirectToQSess($uri3) {
+    redirect(base_url().'questions/takenow/'.$uri3 . '/'. $this->session->userdata('cqID').'?p=pass' );
   }
 
 
   function takenow($id) {
+    // unset($_SESSION['cqID']);
+    // unset($_SESSION['selectedChoices']);
+    $uri3 = $this->uri->segment(3);
+   
+      if(!$this->uri->segment(4) || $this->uri->segment(4) == 0) {
+        echo $this->session->userdata('cqID');
+        if(!$this->session->userdata('cqID') ) {
+          $this->session->set_userdata('cqID', 0);
+        } else {
+          $this->redirectToQSess($uri3);
+        }
+      } else {
+        $nextQ = ($this->session->userdata('cqID') + 1);
+        if(!$this->input->get('p') ) {
+          
+            
+            if($this->uri->segment(4) != $this->session->userdata('cqID') ) {
+             $this->redirectToQSess($uri3);
+            }
+        } else {
+          if( $this->uri->segment(4) != $this->session->userdata('cqID') ) {
+            $this->redirectToQSess($uri3);
+          }
+        }
+      }
+    
+    
     if($this->session->userdata('topicid') == $id) {
-
       $this->load->library('pagination');
       $config['full_tag_open']    =   "<ul class='pagination'>";
       $config['full_tag_close']   =   "</ul>";
@@ -307,28 +332,25 @@ class Questions extends CI_Controller {
       $config['first_tagl_close'] =   "</li>";
       $config['last_tag_open']    =   "<li class='hidden'>";
       $config['last_tagl_close']  =   "</li>";
-      //For NEXT PAGE Setup
-      $config['next_link'] = 'Next';
-      $config['next_tag_open'] = '<li>';
-      $config['next_tag_close'] = '</li>';
-
-      $config["base_url"] = base_url() . "Questions/takenow/".$id."/";
-      $config["total_rows"] = $this->Questions_model->countQuestionsByIdByExaminer($id);
-      $config["per_page"] = 1;
-      $config['uri_segment'] = 4;
-      $limit = $config['per_page'];
+      $config['next_link']        =   'Next';
+      $config['next_tag_open']    =   '<li>';
+      $config['next_tag_close']   =   '</li>';
+      $config["base_url"]         =   base_url() . "Questions/takenow/".$id."/";
+      $config["total_rows"]       =   $this->Questions_model->countQuestionsByIdByExaminer($id);
+      $config["per_page"]         =   1;
+      $config['uri_segment']      =   4;
+      $limit                      =   $config['per_page'];
+      $data['totalPages']         =   ($config["total_rows"] - 1);
 
       $this->pagination->initialize($config);
 
       $page = ($this->uri->segment(4)) ? $this->uri->segment(4) : 0;
 
-      $data["links"] = $this->pagination->create_links();
-
-      $data['topic'] = $this->Questions_model->getTopicById($id);
-      $data['getChoices'] = $this->Questions_model->getQuestionsByQuestionID($id);
-      $data['questions'] = $this->Questions_model->getQuestionsByIdByExaminer($id, $limit, $page);
-
-
+      $data["links"]      =   $this->pagination->create_links();
+      $data['topic']      =   $this->Questions_model->getTopicById($id);
+      $data['getChoices'] =   $this->Questions_model->getQuestionsByQuestionID($id);
+      $data['questions']  =   $this->Questions_model->getQuestionsByIdByExaminer($id, $limit, $page);
+      
       $this->template->set('title', 'Take Exam');
       $this->template->load('template', 'takenow', $data);
     } else {
@@ -337,8 +359,47 @@ class Questions extends CI_Controller {
     }
   }
 
-  function instructions($id) {
+  function addSess() {
+    $uri3 = $this->uri->segment(3);
 
+      if($this->uri->segment(4) ) {
+        if(!$this->session->userdata('cqID') ) {
+          $this->session->set_userdata('cqID', 0);
+        }
+        if($this->uri->segment(4) != "") {
+
+          if($this->input->post('selectedChoices') ) {
+           
+            $_SESSION['selectedChoices'][] = $this->input->post('selectedChoices');
+          } else {
+           // $_SESSION['selectedChoices'][] = $this->input->post('selectedChoices');
+          }
+
+     
+          if($this->uri->segment(4) >= $this->session->userdata('cqID') ) {
+            $this->session->set_userdata('cqID', $this->uri->segment(4) );
+            if($this->uri->segment(4) > $this->session->userdata('cqID') ) {
+              $this->redirectToQSess($uri3);
+            }
+          } else {
+            $this->redirectToQSess($uri3);
+          }
+
+        
+        } else {
+          $this->redirectToQSess($uri3);
+        }
+        redirect(base_url().'questions/takenow/'.$uri3 . '/'. $this->session->userdata('cqID').'?p=pass' );
+      } else {
+        if($this->input->post('submitExam') ) {
+          
+          $_SESSION['selectedChoices'][] = $this->input->post('selectedChoices');
+          redirect(base_url().'questions/recordExam/'.$uri3 . '/');
+        }
+      }
+  }
+
+  function instructions($id) {
     if ($this->session->userdata('start') ) {
       redirect(base_url().'questions/takenow/'.$id); 
       exit;
@@ -357,8 +418,23 @@ class Questions extends CI_Controller {
       $this->session->set_flashdata('durationAdded', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Duration Added!</div>');
       redirect($_SERVER['HTTP_REFERER']);
     }
-
-    
-
   }
+
+  function recordExam() {
+    $ans = '';
+    $keys = '';
+    $_SESSION['selectedChoices'][] = $this->input->post('selectedChoices');
+    foreach($_SESSION['selectedChoices'] as $key => $sc) {
+      $ans[] .=  $sc[0];
+      $keys[] .= ($key+1);
+    }
+    $this->Questions_model->recordExam($ans, $this->uri->segment(3), $keys);
+    $this->session->set_flashdata('examFinished', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Exam Done!</div>');
+    
+    unset($_SESSION['cqID']);
+    unset($_SESSION['selectedChoices']);
+    unset($_SESSION['start']);
+    redirect(base_url().'questions/all');
+  }
+
 }

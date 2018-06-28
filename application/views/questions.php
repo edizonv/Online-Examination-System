@@ -6,7 +6,6 @@
 		</div>
 	<?php else: ?>
 		<div class="panel-heading text-uppercase"><strong>List of available exams</strong>
-			<span class="pull-right"><a href="#" class="white" data-toggle="modal" data-target="#newTopicModal"><i class="fa fa-plus"></i> New Topic</a></span>
 		</div>
 	<?php endif; ?>
 	<div class="panel-body">
@@ -15,6 +14,9 @@
 		<?php endif;?>
 		<?php if($this->session->flashdata('invalidId') ): ?>
 			<?php echo $this->session->flashdata('invalidId'); ?>
+		<?php endif;?>
+		<?php if($this->session->flashdata('examFinished') ): ?>
+			<?php echo $this->session->flashdata('examFinished'); ?>
 		<?php endif;?>
 		<div class="table-responsive">
 			<table class="table table-hover table-bordered">
@@ -25,21 +27,37 @@
 							<th class="text-center">Passed</th>
 							<th class="text-center">Failed</th>
 						<?php else: ?>
-							<th class="text-center">Start Date</th>
+							<th class="text-center">Date Taken</th>
+							<th class="text-center">Status</th>
 						<?php endif; ?>
 					</tr>
 				</thead>
 				<tbody>
 					<?php foreach($allTopics as $item): ?>
 						<?php if($item->status == 1 && $this->session->userdata('userPositionSessId') == 1): // if examiner level ?>
-							<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
-							
+							<?php if($item->dateTaken): ?>
+								<tr onclick="window.location = '/questions/view/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+							<?php else: ?>
+								<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+							<?php endif; ?>
 								<td class="col-md-8"><?php echo $item->title ?></td>
 								<?php if($this->session->userdata('userPositionSessId') == 0): ?>
 									<td class="text-center">1</td>
 									<td class="text-center">2</td>
 								<?php else: ?>
-									<td class="text-center"><?php if($this->session->userdata('startDate') ): ?><?php echo $this->session->userdata('startDate'); ?> <?php else: ?>DONE<?php endif; ?></td>
+									<td class="text-center"><?php echo $item->dateTaken; ?></td>
+									<td class="text-center">
+									<?php 
+									if($item->escore) {
+										$percentage = ($totalQ * .8);
+									    if($item->escore >= $percentage) {
+									      echo '<button type="button" class="btn btn-success">Passed <span class="badge">'.$item->escore.'</span></button>';
+									    } else {
+									      echo '<button type="button" class="btn btn-danger">Failed <span class="badge">'.$item->escore.'</span></button>';
+									    }
+									}
+									?>
+									</td>
 								<?php endif; ?>
 							</tr>
 						<?php elseif($this->session->userdata('userPositionSessId') == 0): // if admin level ?>

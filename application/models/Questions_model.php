@@ -8,6 +8,7 @@ class Questions_model extends CI_Model {
   public $answersTable = "oes_answers";
   public $examinersTable = "oes_examiners";
   public $usersTable = "oes_users";
+  public $recordsTable = "oes_records";
 
   function autocompleteSearch($term) {
     $autocompleteSearch = $this->db
@@ -16,6 +17,14 @@ class Questions_model extends CI_Model {
       ->like('topic_title', $term)
       ->limit(10)
       ->get()
+      ->result();
+    return $autocompleteSearch;
+  }
+
+  function examinerAutocompleteSearch($term, $id) {
+    $autocompleteSearch = $this->db
+      ->query("SELECT DISTINCT topic_id AS id, topic_title AS title, topic_date_added AS dateAdded, topic_status AS status
+      FROM oes_topics AS t INNER JOIN oes_examiners AS e ON t.topic_id = e.examiner_topics WHERE t.topic_title LIKE '%".$term."%'  && e.examiner_id = $id")
       ->result();
     return $autocompleteSearch;
   }
@@ -79,7 +88,7 @@ class Questions_model extends CI_Model {
   function getAllTopicsById($page, $limit, $id) {
     $getAllTopics = $this->db
       ->limit($limit, $page)
-      ->select('t.topic_id AS id, t.topic_title AS title, t.topic_date_added AS dateAdded, t.topic_status AS status, e.examiner_topics AS topics, e.examiner_status AS estatus')
+      ->select('t.topic_id AS id, t.topic_title AS title, t.topic_date_added AS dateAdded, t.topic_status AS status, e.examiner_topics AS topics, e.examiner_topic_date_taken AS dateTaken, e.examiner_score AS escore')
       ->from($this->topicsTable . ' AS t')
       ->join($this->examinersTable. ' AS e', 'e.examiner_topics = t.topic_id')
       ->join($this->usersTable. ' AS u', 'u.user_id = e.examiner_id')
@@ -127,7 +136,6 @@ class Questions_model extends CI_Model {
         c.choice_choice AS choices,
         c.choice_type AS type,
         e.examiner_topic_date_taken AS dateTaken,
-        e.examiner_remaining_time AS remainingTime,
         c.choice_text AS choicesText,
         a.answer_answer AS answer
         FROM oes_topics AS t
@@ -135,7 +143,7 @@ class Questions_model extends CI_Model {
         LEFT JOIN oes_choices AS c ON q.question_no = c.question_no
         LEFT JOIN oes_answers AS a ON c.question_no = a.question_no
         LEFT JOIN oes_examiners AS e ON t.topic_id = e.examiner_id
-        WHERE t.topic_id = 1 && q.question_status = 1 && c.choice_id = 1 GROUP BY q.question_question ORDER BY q.question_question DESC LIMIT $page, $limit")
+        WHERE q.question_id = $id && q.question_status = 1 && c.choice_id = $id GROUP BY q.question_question ORDER BY q.question_no ASC LIMIT $page, $limit")
       ->result();
 
     return $getQuestionsByIdByExaminer;
@@ -152,7 +160,6 @@ class Questions_model extends CI_Model {
         c.choice_choice AS choices,
         c.choice_type AS type,
         e.examiner_topic_date_taken AS dateTaken,
-        e.examiner_remaining_time AS remainingTime,
         c.choice_text AS choicesText,
         a.answer_answer AS answer
         FROM oes_topics AS t
@@ -160,7 +167,7 @@ class Questions_model extends CI_Model {
         LEFT JOIN oes_choices AS c ON q.question_no = c.question_no
         LEFT JOIN oes_answers AS a ON c.question_no = a.question_no
         LEFT JOIN oes_examiners AS e ON t.topic_id = e.examiner_id
-        WHERE t.topic_id = 1 && q.question_status = 1 && c.choice_id = 1 GROUP BY q.question_question ORDER BY q.question_question DESC")
+        WHERE q.question_id = $id && q.question_status = 1 && c.choice_id = $id GROUP BY q.question_question ORDER BY q.question_no ASC")
       ->num_rows();
 
     return $countQuestionsByIdByExaminer;
@@ -370,18 +377,48 @@ class Questions_model extends CI_Model {
     return $updateExamDateTaken;
   }
 
-  function updateRemainingTime($topicId, $remainingTime, $userId) {
-     $where =[
-      'examiner_topics' =>  $topicId,
-      'examiner_id' =>  $userId
+  function recordExam($data = [], $uri3, $key) {
+    error_reporting(1); //hide the last loop.
+
+    $setDatas = [];
+    for($x = 0; $x < count($data); $x++) {
+      $setData = [
+        'record_user_id'  =>  $this->session->userdata('userIDSess'),
+        'record_topic_id' =>  $uri3,
+        'record_question_id'  =>  $key[$x],
+        'record_answer' =>  $data[$x]
+      ];
+      array_push($setDatas, $setData);
+    }
+
+    $getAnswers = $this->db
+      ->where('answer_id', $uri3)
+      ->get($this->answersTable)
+      ->result();
+
+
+    foreach($getAnswers as $key => $answers) {
+      if($setDatas[$key]['record_answer'] == $answers->answer_answer) {
+        $countCorrect[] = $answers->answer_answer;
+      }
+    }
+
+    $score = count($countCorrect);
+
+    $update = [
+      'examiner_score'  =>  $score
     ];
 
-    $set =[
-      'examiner_remaining_time' =>  $remainingTime
-    ];
-    $updateRemainingTime = $this->db->where($where)->update($this->examinersTable, $set);
+    $record['update'] = $this->db
+      ->where('examiner_id', $this->session->userdata('userIDSess') )
+      ->where('examiner_topics', $uri3)
+      ->update($this->examinersTable, $update);
 
-    return $updateRemainingTime;
+    $record['exam'] = $this->db
+      ->insert_batch($this->recordsTable, $setDatas);
+
+    return $record;
+
   }
 
 }

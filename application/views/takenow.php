@@ -1,32 +1,33 @@
 <?php if($this->session->userdata('userPositionSessId') == 1): // examiners only ?>
 
-<div class="panel panel-primary<?php if($topic->status == 0) echo " disable";  ?>" id="topicInfo">
-	<div class="panel-heading"><strong><?php echo $topic->title ?></strong>
-		<p id="demo" class="pull-right"></p>
-	</div>
-	<div class="panel-body">
-		<div class="row">
-			<div class="col-md-12">
-				<?php if($this->session->flashdata('questionStatusUpdated') ): ?>
-					<?php echo $this->session->flashdata('questionStatusUpdated'); ?>
-				<?php endif;?>
-			</div>
-			<div class="col-md-12">
-				<?php if($this->session->flashdata('questionAdded') ): ?>
-					<?php echo $this->session->flashdata('questionAdded'); ?>
-				<?php endif;?>
-			</div>
-			<div class="col-md-12">
-				<?php if($this->session->flashdata('updateExaminersByTopic') ): ?>
-					<?php echo $this->session->flashdata('updateExaminersByTopic'); ?>
-				<?php endif;?>
-			</div>
-			<div class="col-md-12">
-		
+<form action="/Questions/addSess/<?php echo $this->uri->segment(3); ?>/<?php echo $this->uri->segment(4) + 1; ?>" method="POST">
+	<div class="panel panel-primary<?php if($topic->status == 0) echo " disable";  ?>" id="topicInfo">
+		<div class="panel-heading"><strong><?php echo $topic->title ?></strong>
+			<p id="demo" class="pull-right"></p>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-md-12">
+					<?php if($this->session->flashdata('questionStatusUpdated') ): ?>
+						<?php echo $this->session->flashdata('questionStatusUpdated'); ?>
+					<?php endif;?>
+				</div>
+				<div class="col-md-12">
+					<?php if($this->session->flashdata('questionAdded') ): ?>
+						<?php echo $this->session->flashdata('questionAdded'); ?>
+					<?php endif;?>
+				</div>
+				<div class="col-md-12">
+					<?php if($this->session->flashdata('updateExaminersByTopic') ): ?>
+						<?php echo $this->session->flashdata('updateExaminersByTopic'); ?>
+					<?php endif;?>
+				</div>
+				<div class="col-md-12">
+			
 					<?php $columns = array(); ?>
 
 					<?php foreach($questions as $rows): ?>
-	
+
 						<?php if($this->session->userdata('topicid') == $rows->id): ?>
 
 							<?php if(isset($topic->duration) ): ?>
@@ -38,7 +39,7 @@
 
 							<?php if ($rows->questions): ?>
 								<?php if (!isset($columns[$rows->questions]) ): ?>
-									<p class="hr <?php if($rows->qstat == 0): ?> disabled <?php endif; ?>">
+									<p class="<?php if($rows->qstat == 0): ?> disabled <?php endif; ?>">
 									<?php if($this->session->userdata('userPositionSessId') == 0): // examiners only ?>
 										<a href="/questions/edit/<?php echo $rows->id ?>/<?php echo $rows->no ?>"><i class="fa fa-pencil"></i> </a>
 									<?php endif; ?>
@@ -50,7 +51,7 @@
 							<?php if($rows->choices && $rows->choicesText): ?>
 								<?php foreach($getChoices as $c): ?>
 									<?php if ($c->no == $rows->no): ?>
-										<p><?php echo $c->choice. '. ' . $c->choices ?></p>
+										<p><input type="radio" name="selectedChoices[]" value="<?php echo $c->choice ?>"><?php echo $c->choice. '. ' . $c->choices ?></p>
 									<?php endif; ?>
 								<?php endforeach; ?>
 							<?php else: ?>
@@ -69,15 +70,23 @@
 
 					<?php endforeach; ?>
 
-				<input type="hidden" name="hiddenId" id="hiddenId" value="<?php echo $this->uri->segment(3); ?>">
-				<input type="hidden" name="hiddenDate" id="hiddenDate">
-				
+					<input type="hidden" name="hiddenId" id="hiddenId" value="<?php echo $this->uri->segment(3); ?>">
+					<input type="hidden" name="hiddenDate" id="hiddenDate">
+					
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<?php echo $links; ?>
+	<?php echo ($this->uri->segment(4) + 1) . ' of ' .($totalPages + 1); ?>
+
+	<?php if($this->uri->segment(4) == $totalPages): ?>
+		<input type="submit" class="btn btn-primary pull-right" formaction="/Questions/recordExam/<?php echo $this->uri->segment(3); ?>" method="POST" type="submit" name="submitExam" value="Submit">
+	<?php else: ?>
+		<button class="btn btn-default pull-right">Next</button>
+	<?php endif; ?>
+
+</form>
 
 <script>
 	Date.prototype.addHours= function(h){
@@ -88,8 +97,6 @@
 	    this.setMinutes(this.getMinutes()+m);
 	    return this;
 	}
-
-	
 
 	// Set the date we're counting down to
 
