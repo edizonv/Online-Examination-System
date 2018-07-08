@@ -79,9 +79,12 @@ class Questions_model extends CI_Model {
   function getAllTopics($page, $limit) {
   	$getAllTopics = $this->db
   		->limit($limit, $page)
-  		->select('topic_id AS id, topic_title AS title, topic_date_added AS dateAdded, topic_status AS status')
-  		->from($this->topicsTable)
-    	->get();
+      ->DISTINCT()
+      ->select('t.topic_id AS id, t.topic_title AS title, t.topic_date_added AS dateAdded, t.topic_status AS status, e.examiner_status AS eStatus')
+      ->group_by('t.topic_id')
+      ->from($this->topicsTable . ' AS t')
+      ->join($this->examinersTable. ' AS e', 'e.examiner_topics = t.topic_id', 'left')
+      ->get();
     return $getAllTopics;
   }
 
@@ -124,6 +127,32 @@ class Questions_model extends CI_Model {
 
     return $getQuestionsById;
   }
+
+
+  // function getQuestionsByIdAndUserId($id, $userId) {
+  //   $getQuestionsById = $this->db
+  //     ->query("SELECT DISTINCT t.topic_id AS id,
+  //       t.topic_title AS title,
+  //       t.topic_date_added AS dateAdded,
+  //       t.topic_status AS status,
+  //       q.question_no AS no,
+  //       q.question_question AS questions,
+  //       q.question_status AS qstat,
+  //       c.choice_choice AS choices,
+  //       c.choice_type AS type,
+  //       c.choice_text AS choicesText,
+  //       a.answer_answer AS answer,
+  //       r.record_answer AS recordAnswer,
+  //       FROM $this->topicsTable AS t
+  //       LEFT JOIN $this->questionsTable AS q ON t.topic_id = q.question_id
+  //       LEFT JOIN $this->choicesTable AS c ON q.question_no = c.question_no
+  //       LEFT JOIN $this->answersTable AS a ON c.question_no = a.question_no
+  //       LEFT JOIN $this->recordsTable AS r ON c.question_no = r.record_question_id
+  //       WHERE t.topic_id = $id && record_user_id = $userId")
+  //     ->result();
+
+  //   return $getQuestionsById;
+  // }
 
   function getQuestionsByIdByExaminer($id, $limit, $page) {
     $getQuestionsByIdByExaminer = $this->db
@@ -382,12 +411,14 @@ class Questions_model extends CI_Model {
 
     $setDatas = [];
     for($x = 0; $x < count($data); $x++) {
-      $setData = [
-        'record_user_id'  =>  $this->session->userdata('userIDSess'),
-        'record_topic_id' =>  $uri3,
-        'record_question_id'  =>  $key[$x],
-        'record_answer' =>  $data[$x]
-      ];
+      if($data[$x] != "") {
+        $setData = [
+          'record_user_id'  =>  $this->session->userdata('userIDSess'),
+          'record_topic_id' =>  $uri3,
+          'record_question_id'  =>  $key[$x],
+          'record_answer' =>  $data[$x]
+        ];
+      }
       array_push($setDatas, $setData);
     }
 
@@ -405,8 +436,17 @@ class Questions_model extends CI_Model {
 
     $score = count($countCorrect);
 
+    $total = $this->session->userdata('hiddenTotal');
+    $percentage = ($total * .8);
+    if ($score >= $percentage) {
+      $status = 1;
+    } else {
+      $status = 0;
+    }
+
     $update = [
-      'examiner_score'  =>  $score
+      'examiner_score'  =>  $score,
+      'examiner_status'  =>  $status
     ];
 
     $record['update'] = $this->db
@@ -418,6 +458,17 @@ class Questions_model extends CI_Model {
       ->insert_batch($this->recordsTable, $setDatas);
 
     return $record;
+
+  }
+
+  function getScores() {
+    $getScores = $this->db
+      ->select('examiner_status AS status, examiner_topics AS topic, examiner_score AS score')
+      ->from($this->examinersTable)
+      ->where('examiner_score !=', "")
+      ->get()
+      ->result();
+    return $getScores;
 
   }
 

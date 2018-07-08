@@ -28,7 +28,7 @@
 							<th class="text-center">Failed</th>
 						<?php else: ?>
 							<th class="text-center">Date Taken</th>
-							<th class="text-center">Status</th>
+							<th class="text-center">Score</th>
 						<?php endif; ?>
 					</tr>
 				</thead>
@@ -45,16 +45,25 @@
 									<td class="text-center">1</td>
 									<td class="text-center">2</td>
 								<?php else: ?>
-									<td class="text-center"><?php echo $item->dateTaken; ?></td>
+									<td class="text-center"><?php 
+									if($item->dateTaken) {
+										echo date("M d, Y h:i:s", strtotime($item->dateTaken) );
+									} else {
+										echo "N/A";
+									}
+
+									?></td>
 									<td class="text-center">
 									<?php 
-									if($item->escore) {
+									if($item->escore != "") {
 										$percentage = ($totalQ * .8);
 									    if($item->escore >= $percentage) {
 									      echo '<button type="button" class="btn btn-success">Passed <span class="badge">'.$item->escore.'</span></button>';
 									    } else {
 									      echo '<button type="button" class="btn btn-danger">Failed <span class="badge">'.$item->escore.'</span></button>';
 									    }
+									} else {
+										echo "N/A";
 									}
 									?>
 									</td>
@@ -63,8 +72,33 @@
 						<?php elseif($this->session->userdata('userPositionSessId') == 0): // if admin level ?>
 							<tr onclick="window.location = '/questions/manage/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
 								<td class="col-md-8"><?php echo $item->title ?></td>
-								<td class="text-center">1</td>
-								<td class="text-center">2</td>
+								
+								<td class="text-center">
+									<?php 
+									$count = 0;
+									foreach($scores as $key => $score) {
+										if($item->id == $score->topic) {
+											if($score->status == 1) {
+												$count++;
+											}
+										}
+									}
+									echo $count;
+									 ?>
+								</td>
+								<td class="text-center">
+									<?php 
+									$count = 0;
+									foreach($scores as $key => $score) {
+										if($item->id == $score->topic) {
+											if($score->status == 0) {
+												$count++;
+											}
+										}
+									}
+									echo $count;
+									 ?>
+								</td>
 							</tr>
 						<?php endif; ?>
 					<?php endforeach; ?>

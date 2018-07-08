@@ -72,6 +72,7 @@
 
 					<input type="hidden" name="hiddenId" id="hiddenId" value="<?php echo $this->uri->segment(3); ?>">
 					<input type="hidden" name="hiddenDate" id="hiddenDate">
+					<input type="hidden" name="hiddenTotal" id="hiddenTotal" value="<?php echo ($totalPages + 1) ?>">
 					
 				</div>
 			</div>
@@ -149,7 +150,7 @@
 	  if (distance < 0) {
 	    clearInterval(x);
 	    document.getElementById("demo").innerHTML = "TIMES UP";
-	    //window.location = "";
+	    window.location = "/Questions/recordExam/"+hiddenId;
 	  }
 	}, 1000);
 </script>

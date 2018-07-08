@@ -5,7 +5,7 @@
 	  <a class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">ACTION <span class="caret"></span></a>
 	  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
 	  	<?php if($questions[0]->status): ?>
-		    <li><a href="#" class="white" data-toggle="modal" data-target="#durationModal"><i class="fa fa-plus"></i> ADD DURATION</a></li>
+		    <li><a href="#" class="white" data-toggle="modal" data-target="#durationModal"><i class="fa fa-plus"></i> UPDATE DURATION</a></li>
 		    <li><a href="#" class="white" data-toggle="modal" data-target="#newQuestionModal"><i class="fa fa-plus"></i> NEW QUESTION</a></li>
 		    <li><a href="#" class="white" data-toggle="modal" data-target="#newExaminersModal"><i class="fa fa-plus"></i> ADD EXAMINER</a></li>
 	    	<li class="divider"></li>
@@ -84,7 +84,7 @@
 	        		<label>
 	        			HOURS : 
 		        		<select name="hours" class="form-control">
-		        			<?php for($x = 1; $x <= 59; $x++): ?>
+		        			<?php for($x = 0; $x <= 59; $x++): ?>
 		        				<option value="<?php echo str_pad($x, 2, '0', STR_PAD_LEFT); ?>"><?php echo str_pad($x, 2, '0', STR_PAD_LEFT); ?></option>
 		        			<?php endfor; ?>
 		        		</select>
