@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 09, 2018 at 01:47 AM
+-- Generation Time: Jul 10, 2018 at 03:30 AM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 7.0.15
 
@@ -186,7 +186,7 @@ CREATE TABLE `oes_topics` (
 --
 
 INSERT INTO `oes_topics` (`topic_id`, `topic_title`, `topic_slug`, `topic_duration`, `topic_date_added`, `topic_status`) VALUES
-(1, 'PHP Job Exam 2018', 'PHP-Job-Exam-2018', '00:01', '2018-06-28 05:58:08', 1),
+(1, 'PHP Job Exam 2018', 'PHP-Job-Exam-2018', '01:00', '2018-07-10 00:14:41', 1),
 (2, 'JavaScript Job Exam 2018', 'JavaScript-Job-Exam-2018', '', '2018-06-07 02:09:52', 1),
 (3, 'C++ Job Exam 2018', 'Cplusplus-Job-Exam-2018', '', '2018-06-07 02:11:38', 0),
 (4, 'NodeJS Job Exam 2018', 'NodeJS-Job-Exam-2018', '', '2018-06-07 02:11:38', 0),
@@ -223,8 +223,8 @@ CREATE TABLE `oes_users` (
 --
 
 INSERT INTO `oes_users` (`user_id`, `user_name`, `user_uname`, `user_pw`, `user_position`, `user_email`, `user_date_added`, `user_last_login`, `user_google_login`, `user_status`) VALUES
-(1, 'Edizon Villegas', 'Edizon', '$2y$10$NdJf/fT5xu3hMPnIZMrT4.cOOKmhvBNmvch.peZJB.H7kCAdcxiP6', 0, 'edizonv@gmail.com', '2018-05-17 04:24:36', '2018-06-28 02:31:17', 0, 1),
-(2, 'test test', 'test', '$2y$10$NdJf/fT5xu3hMPnIZMrT4.cOOKmhvBNmvch.peZJB.H7kCAdcxiP6', 1, 'test@gmail.com', '2018-05-17 04:24:36', '2018-07-08 23:23:05', 0, 1),
+(1, 'Edizon Villegas', 'Edizon', '$2y$10$NdJf/fT5xu3hMPnIZMrT4.cOOKmhvBNmvch.peZJB.H7kCAdcxiP6', 0, 'edizonv@gmail.com', '2018-05-17 04:24:36', '2018-07-09 23:58:45', 0, 1),
+(2, 'test test', 'test', '$2y$10$NdJf/fT5xu3hMPnIZMrT4.cOOKmhvBNmvch.peZJB.H7kCAdcxiP6', 1, 'test@gmail.com', '2018-05-17 04:24:36', '2018-07-09 05:05:38', 0, 1),
 (3, 'dummy dummy', 'dummy', '$2y$10$NdJf/fT5xu3hMPnIZMrT4.cOOKmhvBNmvch.peZJB.H7kCAdcxiP6', 1, 'dummy@gmail.com', '2018-05-17 04:24:36', '2018-05-29 02:00:50', 0, 1),
 (4, 'aling vicky', 'vicky', '$2y$10$NdJf/fT5xu3hMPnIZMrT4.cOOKmhvBNmvch.peZJB.H7kCAdcxiP6', 1, 'alingVicky@gmail.com', '2018-05-17 04:24:36', '2018-05-29 02:00:50', 0, 1);
 
