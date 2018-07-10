@@ -150,6 +150,7 @@ class Questions extends CI_Controller {
 
 		$data["links"] = $this->pagination->create_links();
 		$data['allTopics'] = $this->Questions_model->searchTopics($term, $page, $limit)->result();
+    $data['scores'] = $this->Questions_model->getScores();
 
 		$this->template->set('title', 'Home');
 		$this->template->load('template', 'questions', $data);
@@ -403,7 +404,7 @@ class Questions extends CI_Controller {
   }
 
   function view($id) {
-    $userId = $this->session->userdata('userSessId');
+    $userId = $this->session->userdata('userIDSess');
     $results['questions'] = $this->Questions_model->getQuestionsByIdAndUserId($id, $userId);
     $results['topic'] = $this->Questions_model->getTopicById($id);
     $this->template->set('title', 'Mangage Questionnaires');

@@ -129,30 +129,30 @@ class Questions_model extends CI_Model {
   }
 
 
-  // function getQuestionsByIdAndUserId($id, $userId) {
-  //   $getQuestionsById = $this->db
-  //     ->query("SELECT DISTINCT t.topic_id AS id,
-  //       t.topic_title AS title,
-  //       t.topic_date_added AS dateAdded,
-  //       t.topic_status AS status,
-  //       q.question_no AS no,
-  //       q.question_question AS questions,
-  //       q.question_status AS qstat,
-  //       c.choice_choice AS choices,
-  //       c.choice_type AS type,
-  //       c.choice_text AS choicesText,
-  //       a.answer_answer AS answer,
-  //       r.record_answer AS recordAnswer,
-  //       FROM $this->topicsTable AS t
-  //       LEFT JOIN $this->questionsTable AS q ON t.topic_id = q.question_id
-  //       LEFT JOIN $this->choicesTable AS c ON q.question_no = c.question_no
-  //       LEFT JOIN $this->answersTable AS a ON c.question_no = a.question_no
-  //       LEFT JOIN $this->recordsTable AS r ON c.question_no = r.record_question_id
-  //       WHERE t.topic_id = $id && record_user_id = $userId")
-  //     ->result();
+  function getQuestionsByIdAndUserId($id, $userId) {
+    $getQuestionsById = $this->db
+      ->query("SELECT DISTINCT t.topic_id AS id,
+        t.topic_title AS title,
+        t.topic_date_added AS dateAdded,
+        t.topic_status AS status,
+        q.question_no AS no,
+        q.question_question AS questions,
+        q.question_status AS qstat,
+        c.choice_choice AS choices,
+        c.choice_type AS type,
+        c.choice_text AS choicesText,
+        a.answer_answer AS answer,
+        r.record_answer AS recordAnswer
+        FROM $this->topicsTable AS t
+        LEFT JOIN $this->questionsTable AS q ON t.topic_id = q.question_id
+        LEFT JOIN $this->choicesTable AS c ON q.question_no = c.question_no
+        LEFT JOIN $this->answersTable AS a ON c.question_no = a.question_no
+        LEFT JOIN $this->recordsTable AS r ON c.question_no = r.record_question_id
+        WHERE t.topic_id = $id && r.record_user_id = $userId && c.choice_text != '' ")
+      ->result();
 
-  //   return $getQuestionsById;
-  // }
+    return $getQuestionsById;
+  }
 
   function getQuestionsByIdByExaminer($id, $limit, $page) {
     $getQuestionsByIdByExaminer = $this->db

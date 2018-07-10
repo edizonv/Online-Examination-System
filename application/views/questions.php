@@ -35,7 +35,7 @@
 				<tbody>
 					<?php foreach($allTopics as $item): ?>
 						<?php if($item->status == 1 && $this->session->userdata('userPositionSessId') == 1): // if examiner level ?>
-							<?php if($item->dateTaken): ?>
+							<?php if(isset($item->dateTaken) ): ?>
 								<tr onclick="window.location = '/questions/view/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
 							<?php else: ?>
 								<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
@@ -46,7 +46,7 @@
 									<td class="text-center">2</td>
 								<?php else: ?>
 									<td class="text-center"><?php 
-									if($item->dateTaken) {
+									if(isset($item->dateTaken) ) {
 										echo date("M d, Y h:i:s", strtotime($item->dateTaken) );
 									} else {
 										echo "N/A";
@@ -55,15 +55,17 @@
 									?></td>
 									<td class="text-center">
 									<?php 
-									if($item->escore != "") {
-										$percentage = ($totalQ * .8);
-									    if($item->escore >= $percentage) {
-									      echo '<button type="button" class="btn btn-success">Passed <span class="badge">'.$item->escore.'</span></button>';
-									    } else {
-									      echo '<button type="button" class="btn btn-danger">Failed <span class="badge">'.$item->escore.'</span></button>';
-									    }
-									} else {
-										echo "N/A";
+									if(isset($item->escore) ) {
+										if($item->escore != "") {
+											$percentage = ($totalQ * .8);
+										    if($item->escore >= $percentage) {
+										      echo '<button type="button" class="btn btn-success">Passed <span class="badge">'.$item->escore.'</span></button>';
+										    } else {
+										      echo '<button type="button" class="btn btn-danger">Failed <span class="badge">'.$item->escore.'</span></button>';
+										    }
+										} else {
+											echo "N/A";
+										}
 									}
 									?>
 									</td>

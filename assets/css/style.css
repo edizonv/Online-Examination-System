@@ -458,12 +458,19 @@ textarea.form-control {
     text-align: center;
 }
 
+#topicInfo .correction {
+    background: green !important;
+    color: #fff;
+    border-radius: 100%;
+    padding: 5px 10px;
+    text-align: center;
+}
+
 .hr {
     border-top: 1px solid #eee;
     padding-top: 10px;
     margin-top: 10px;
     clear: both;
-    margin-bottom: 10px;
 }
 
 .hr:first-child {
@@ -553,6 +560,19 @@ label {
 
 td {
   vertical-align: middle!important;
+}
+
+.selectedAns {
+  text-decoration: underline;
+}
+
+.wrong {
+  color: red;
+  font-weight: bold;
+}
+.correct {
+  font-weight: bold;
+  color: green;
 }
 
 @media screen and (max-width:991px) {
