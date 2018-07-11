@@ -18,8 +18,11 @@
 		<?php if($this->session->flashdata('examFinished') ): ?>
 			<?php echo $this->session->flashdata('examFinished'); ?>
 		<?php endif;?>
+		<?php if($this->session->flashdata('alreadyTAken') ): ?>
+			<?php echo $this->session->flashdata('alreadyTAken'); ?>
+		<?php endif;?>
 		<div class="table-responsive">
-			<table class="table table-hover table-bordered">
+			<table class="table table-hover">
 				<thead>
 					<tr>
 						<th>Topic</th>
@@ -75,7 +78,7 @@
 							<tr onclick="window.location = '/questions/manage/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
 								<td class="col-md-8"><?php echo $item->title ?></td>
 								
-								<td class="text-center">
+								<td class="text-center bg-passed">
 									<?php 
 									$count = 0;
 									foreach($scores as $key => $score) {
@@ -88,7 +91,7 @@
 									echo $count;
 									 ?>
 								</td>
-								<td class="text-center">
+								<td class="text-center bg-failed">
 									<?php 
 									$count = 0;
 									foreach($scores as $key => $score) {
@@ -107,8 +110,8 @@
 				</tbody>
 			</table>
 		</div>
-		<?php echo $links; ?>
 	</div>
+		<?php echo $links; ?>
 </div>
 <?php //endif; ?>
 <!-- Modal -->

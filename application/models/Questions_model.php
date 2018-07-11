@@ -128,6 +128,16 @@ class Questions_model extends CI_Model {
     return $getQuestionsById;
   }
 
+  function ifAlreadyTaken($topicId, $userId) {
+    $ifAlreadyTaken = $this->db
+      ->where('examiner_topics', $topicId)
+      ->where('examiner_id', $userId)
+      ->where('examiner_score !=', "")
+      ->get($this->examinersTable)
+      ->num_rows();
+    return $ifAlreadyTaken;
+  }
+
 
   function getQuestionsByIdAndUserId($id, $userId) {
     $getQuestionsById = $this->db
@@ -152,6 +162,44 @@ class Questions_model extends CI_Model {
       ->result();
 
     return $getQuestionsById;
+  }
+
+  function reports($page, $limit) {
+    $reports = $this->db
+      ->query("SELECT DISTINCT
+        e.examiner_topic_date_taken AS dateTaken,
+        e.examiner_score AS score,
+        u.user_id AS id,
+        u.user_name AS name,
+        t.topic_title AS title
+        FROM oes_examiners AS e
+        INNER JOIN oes_users AS u
+        ON u.user_id = e.examiner_id
+        INNER JOIN oes_topics AS t
+        ON e.examiner_topics = t.topic_id
+        WHERE e.examiner_score != '' LIMIT $page, $limit")
+      ->result();
+
+    return $reports;
+  }
+
+  function countReports() {
+    $countReports = $this->db
+      ->query("SELECT DISTINCT
+        e.examiner_topic_date_taken AS dateTaken,
+        e.examiner_score AS score,
+        u.user_id AS id,
+        u.user_name AS name,
+        t.topic_title AS title
+        FROM oes_examiners AS e
+        INNER JOIN oes_users AS u
+        ON u.user_id = e.examiner_id
+        INNER JOIN oes_topics AS t
+        ON e.examiner_topics = t.topic_id
+        WHERE e.examiner_score != ''")
+      ->num_rows();
+
+    return $countReports;
   }
 
   function getQuestionsByIdByExaminer($id, $limit, $page) {

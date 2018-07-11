@@ -41,7 +41,7 @@ class Questions extends CI_Controller {
 		$config['last_tagl_close'] 	= 	"</li>";
 		$config["base_url"] = base_url() . "Questions/all";
 		$config["total_rows"] = $this->Questions_model->countAllTopics()->num_rows();
-		$config["per_page"] = 15;
+		$config["per_page"] = 10;
 		$config['uri_segment'] = 3;
     $data['totalQ'] = $config["total_rows"];
 		$limit = $config['per_page'];
@@ -79,7 +79,6 @@ class Questions extends CI_Controller {
 		echo json_encode($json_array);
   }
 
-
   function ifExist() {
   	$term = $this->input->post('term');
 		$results = $this->Questions_model->ifExisting($term);
@@ -99,6 +98,9 @@ class Questions extends CI_Controller {
   }
 
   function manage($id) {
+    if($this->session->userdata('userPositionSessId') != 0) {
+      redirect(base_url().'questions/all');
+    }
     $results['examiners'] = $this->Users_model->getAllExaminersById($id);
   	$results['questions'] = $this->Questions_model->getQuestionsById($id);
   	$results['topic'] = $this->Questions_model->getTopicById($id);
@@ -108,7 +110,8 @@ class Questions extends CI_Controller {
 
   function take() {
     $term = $this->input->post('examiner');
-    $results = $this->Users_model->getAllExaminers($term);
+    $hiddenID = $this->input->post('hiddenID');
+    $results = $this->Users_model->getAllExaminers($term, $hiddenID);
     $json_array = array();
     foreach($results as $rows) {
       array_push($json_array, "#".$rows->id.' - '.$rows->name);
@@ -140,7 +143,7 @@ class Questions extends CI_Controller {
 		$config['last_tagl_close'] 	= 	"</li>";
 		$config["base_url"] = base_url() . "Questions/results/".$term."/";
 		$config["total_rows"] = $this->Questions_model->countSearchTopics($term)->num_rows();
-		$config["per_page"] = 15;
+		$config["per_page"] = 2;
 		$config['uri_segment'] = 4;
 		$limit = $config['per_page'];
 
@@ -151,7 +154,6 @@ class Questions extends CI_Controller {
 		$data["links"] = $this->pagination->create_links();
 		$data['allTopics'] = $this->Questions_model->searchTopics($term, $page, $limit)->result();
     $data['scores'] = $this->Questions_model->getScores();
-
 		$this->template->set('title', 'Home');
 		$this->template->load('template', 'questions', $data);
   }
@@ -413,14 +415,23 @@ class Questions extends CI_Controller {
   }
 
   function instructions($id) {
-    if ($this->session->userdata('start') ) {
-      redirect(base_url().'questions/takenow/'.$id); 
-      exit;
-    }
 
-    $data['topic'] = $this->Questions_model->getTopicById($id);
-    $this->template->set('title', 'Read first before taking exam');
-    $this->template->load('template', 'instructions', $data);
+    $ifAlreadyTaken =  $this->Questions_model->ifAlreadyTaken($id, $this->session->userdata('userIDSess') );
+
+
+    if($ifAlreadyTaken == 0) {
+      if ($this->session->userdata('start') ) {
+        redirect(base_url().'questions/takenow/'.$id); 
+        exit;
+      }
+
+      $data['topic'] = $this->Questions_model->getTopicById($id);
+      $this->template->set('title', 'Read first before taking exam');
+      $this->template->load('template', 'instructions', $data);
+    } else {
+      $this->session->set_flashdata('alreadyTAken', '<div class="alert alert-warning"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>You already taken this exam.</div>');
+      redirect(base_url().'questions/all' );
+    }
   }
 
   function add_duration() {
@@ -449,6 +460,42 @@ class Questions extends CI_Controller {
     unset($_SESSION['start']);
     unset($_SESSION['hiddenTotal']);
     redirect(base_url().'questions/all');
+  }
+
+  function reports() {
+
+    $this->load->library('pagination');
+    $config['full_tag_open']    =   "<ul class='pagination pull-right'>";
+    $config['full_tag_close']   =   "</ul>";
+    $config['num_tag_open']     =   '<li>';
+    $config['num_tag_close']    =   '</li>';
+    $config['cur_tag_open']     =   "<li class='disabled'><li class='active'><a href='#'>";
+    $config['cur_tag_close']    =   "<span class='sr-only'></span></a></li>";
+    $config['next_tag_open']    =   "<li>";
+    $config['next_tagl_close']  =   "</li>";
+    $config['prev_tag_open']    =   "<li>";
+    $config['prev_tagl_close']  =   "</li>";
+    $config['first_tag_open']   =   "<li>";
+    $config['first_tagl_close'] =   "</li>";
+    $config['last_tag_open']    =   "<li>";
+    $config['last_tagl_close']  =   "</li>";
+    $config["base_url"] = base_url() . "Questions/results/";
+    $config["total_rows"] = $this->Questions_model->countReports();
+    $config["per_page"] = 15;
+    $config['uri_segment'] = 3;
+    $limit = $config['per_page'];
+
+    $this->pagination->initialize($config);
+
+    $page = ($this->uri->segment(3) ) ? $this->uri->segment(3) : 0;
+
+    $data["links"] = $this->pagination->create_links();
+
+
+    $data['reports'] = $this->Questions_model->reports($page, $limit);
+
+    $this->template->set('title', 'Reports');
+    $this->template->load('template', 'reports', $data);
   }
 
 }

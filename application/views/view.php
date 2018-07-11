@@ -1,4 +1,3 @@
-
 <div class="panel panel-primary<?php if($topic->status == 0) echo " disable";  ?>" id="topicInfo">
 	<div class="panel-heading text-uppercase"><strong><?php echo $topic->title . ' (' . $topic->duration.')'; ?></strong>
 	<?php $count = ""; ?>

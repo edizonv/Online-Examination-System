@@ -166,7 +166,8 @@ $(function() {
 			$.ajax({ 
 				url: "/questions/take",
 				data: {
-					examiner: $(".examiner").val()
+					examiner: $(".examiner").val(),
+					hiddenID: $("#hiddenID").val()
 				},
 				dataType: "json",
 				type: "POST",

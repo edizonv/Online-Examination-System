@@ -93,15 +93,17 @@ class Users_model extends CI_Model {
     $activate = $this->db->update($this->usersTable, $data);
   }
 
-  function getAllExaminers($term) {
+  function getAllExaminers($term, $topicId) {
     $getAllExaminers = $this->db
-      ->distinct()
-      ->select('u.user_id AS id, u.user_name AS name')
-      ->from($this->usersTable . ' AS u')
-      ->join($this->examinersTable . ' AS e', 'u.user_id != e.examiner_id', 'left')
-      ->like('u.user_name', $term)
-      ->where('u.user_position !=', 0)
-      ->get()
+      ->query("SELECT
+      DISTINCT
+      u.user_id AS id,
+      u.user_name AS name
+      FROM oes_users AS u
+      JOIN oes_examiners AS e
+      WHERE NOT EXISTS(
+        SELECT 1 FROM oes_examiners AS e WHERE u.user_id = e.examiner_id
+      ) && u.user_name LIKE '%".$term."%' && e.examiner_topics = $topicId && u.user_position != 0")
       ->result();
     return $getAllExaminers;
   }

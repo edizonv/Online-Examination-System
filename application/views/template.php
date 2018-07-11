@@ -14,7 +14,9 @@
 						<a href="/" class="list-group-item <?php if($this->uri->segment(1) == '' || $this->uri->segment(1) == 'questions' && $this->uri->segment(2) != "all" &&  $this->uri->segment(2) != 'takenow' &&  $this->uri->segment(2) != 'instructions'  &&  $this->uri->segment(2) != 'view'): ?>active<?php endif; ?>"><i class="fa fa-user"></i> My Profile</a>
 						<a href="/questions/all" class="list-group-item <?php if($this->uri->segment(2) == 'all' || $this->uri->segment(2) == 'results' || $this->uri->segment(2) == 'manage' || $this->uri->segment(2) == 'edit'|| $this->uri->segment(2) == 'takenow'  ||  $this->uri->segment(2) == 'instructions'  ||  $this->uri->segment(2) == 'view'): ?>active<?php endif; ?>"><i class="fa fa-bookmark"></i> Questionnaires</a>
 					<?php endif; ?>
-					<a href="#" class="list-group-item"><i class="fa fa-folder"></i> Reports</a>
+					<?php if($this->session->userdata('userPositionSessId') == 0): // admin only ?>
+						<a href="/questions/reports" class="list-group-item  <?php if($this->uri->segment(2) == 'reports'): ?>active<?php endif; ?>"><i class="fa fa-folder"></i> Reports</a>
+					<?php endif; ?>
 					<a href="#" class="list-group-item"><i class="fa fa-lock"></i> Change Password</a>
 					<a href="/users/logout" class="list-group-item"><i class="fa fa-power-off"></i> Logout</a>
 				</div>

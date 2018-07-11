@@ -177,5 +177,6 @@
 
   </div>
 </div>
-
+<?php else: ?>
+	<div class="alert alert-danger">You dont have access to this page.</div>
 <?php endif; ?>
