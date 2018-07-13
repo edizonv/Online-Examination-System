@@ -13,7 +13,7 @@
 	<div class="panel-body">
 		<div class="row">
 			<div class="col-md-12">
-				<?php if(isset($questions[0]->status) ): ?>
+				<?php if(count($count) ): ?>
 					<?php $columns = array(); ?>
 					<?php foreach($questions as $rows): ?>
 						<?php if (!isset($columns[$rows->questions]) ): ?>

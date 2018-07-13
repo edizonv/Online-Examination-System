@@ -18,7 +18,7 @@
 						<a href="/questions/reports" class="list-group-item  <?php if($this->uri->segment(2) == 'reports'): ?>active<?php endif; ?>"><i class="fa fa-folder"></i> Reports</a>
 					<?php endif; ?>
 					<a href="#" class="list-group-item"><i class="fa fa-lock"></i> Change Password</a>
-					<a href="/users/logout" class="list-group-item"><i class="fa fa-power-off"></i> Logout</a>
+					<a href="/users/logout" onclick="signOut();" class="list-group-item"><i class="fa fa-power-off"></i> Logout</a>
 				</div>
 			</div>
 		<?php endif; ?>

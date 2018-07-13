@@ -7,7 +7,10 @@
 	  	<?php if($questions[0]->status): ?>
 		    <li><a href="#" class="white" data-toggle="modal" data-target="#durationModal"><i class="fa fa-plus"></i> UPDATE DURATION</a></li>
 		    <li><a href="#" class="white" data-toggle="modal" data-target="#newQuestionModal"><i class="fa fa-plus"></i> NEW QUESTION</a></li>
-		    <li><a href="#" class="white" data-toggle="modal" data-target="#newExaminersModal"><i class="fa fa-plus"></i> ADD EXAMINER</a></li>
+		    <?php if($topic->duration ): ?>
+		    	<li><a href="#" class="white" data-toggle="modal" data-target="#newExaminersModal"><i class="fa fa-plus"></i> ADD EXAMINER</a></li>
+			<?php endif; ?>
+		    <li><a href="/reports/history/<?php echo $this->uri->segment('3') ?>" class="white"><i class="fa fa-search"></i> EXAM HISTORY</a></li>
 	    	<li class="divider"></li>
 	    <?php endif; ?>
 	    <li><a tabindex="-1" href="/questions/status/<?php echo $this->uri->segment(3); ?>/<?php echo $topic->status ?>"><i class="fa fa-power-off"></i><?php if($topic->status == 1): ?> DISABLE <?php else: ?> ENABLE <?php endif; ?></a></li>
@@ -16,6 +19,11 @@
 </div>
 	<div class="panel-body">
 		<div class="row">
+			<div class="col-md-12">
+				<?php if(!$topic->duration ): ?>
+					<div class="alert alert-warning">Duration not yet specify. <a href="#" data-toggle="modal" data-target="#durationModal">Add Duration</a> to be able to add examiners.</div>
+				<?php endif;?>
+			</div>
 			<div class="col-md-12">
 				<?php if($this->session->flashdata('questionStatusUpdated') ): ?>
 					<?php echo $this->session->flashdata('questionStatusUpdated'); ?>
@@ -59,7 +67,10 @@
 						
 					<?php endforeach; ?>
 				<?php else: ?>
-					<div class="alert alert-warning"><p>Please enable first to add</p></div>
+					<div class="alert alert-warning"><p>Please enable first to manage</p></div>
+					<?php if(!$topic->duration ): ?>
+						<div class="alert alert-warning">Duration not yet specify. <a href="#" data-toggle="modal" data-target="#durationModal">Add Duration</a> to be able to add examiners.</div>
+					<?php endif;?>
 				<?php endif; ?>
 			</div>
 		</div>

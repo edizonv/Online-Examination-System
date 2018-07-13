@@ -76,6 +76,40 @@ class Questions_model extends CI_Model {
     return $searchTopics;
   }
 
+
+   function searchTopics2($term, $page, $limit, $id) {
+    $searchTopics2 = $this->db
+      ->query("SELECT
+        t.topic_id AS id,
+        e.examiner_topic_date_taken AS dateTaken,
+        e.examiner_score AS escore,
+        e.examiner_status AS estat,
+        e.examiner_topics AS topics,
+        t.topic_titLe AS title,
+        e.examiner_status AS status
+        FROM oes_examiners AS e
+        JOIN oes_topics AS t
+        ON e.examiner_topics = t.topic_id
+        WHERE t.topic_slug LIKE '%".$term."%' && e.examiner_id = $id
+        LIMIT $page, $limit
+      ");
+    return $searchTopics2;
+  }
+
+  function countSearchTopics2($term, $id) {
+    $countSearchTopics2 = $this->db
+      ->query("SELECT
+        DISTINCT 
+        e.examiner_topics AS topics,
+        t.topic_titLe AS title
+        FROM oes_examiners AS e
+        JOIN oes_topics AS t
+        ON e.examiner_topics = t.topic_id
+        WHERE t.topic_slug LIKE '%".$term."%' && e.examiner_id = $id
+      ");
+    return $countSearchTopics2;
+  }
+
   function getAllTopics($page, $limit) {
   	$getAllTopics = $this->db
   		->limit($limit, $page)
@@ -91,7 +125,7 @@ class Questions_model extends CI_Model {
   function getAllTopicsById($page, $limit, $id) {
     $getAllTopics = $this->db
       ->limit($limit, $page)
-      ->select('t.topic_id AS id, t.topic_title AS title, t.topic_date_added AS dateAdded, t.topic_status AS status, e.examiner_topics AS topics, e.examiner_topic_date_taken AS dateTaken, e.examiner_score AS escore')
+      ->select('t.topic_id AS id, t.topic_title AS title, t.topic_date_added AS dateAdded, t.topic_status AS status, e.examiner_topics AS topics, e.examiner_topic_date_taken AS dateTaken, e.examiner_score AS escore, e.examiner_status AS estat')
       ->from($this->topicsTable . ' AS t')
       ->join($this->examinersTable. ' AS e', 'e.examiner_topics = t.topic_id')
       ->join($this->usersTable. ' AS u', 'u.user_id = e.examiner_id')
@@ -101,8 +135,16 @@ class Questions_model extends CI_Model {
   }
 
   function countAllTopics() {
-  	$countAllTopics = $this->db->get($this->topicsTable);
+  	$countAllTopics = $this->db
+      ->get($this->topicsTable);
     return $countAllTopics;
+  }
+
+  function countAllTopics2($id) {
+    $countAllTopics2 = $this->db
+    ->where('examiner_id', $id)
+    ->get($this->examinersTable);
+    return $countAllTopics2;
   }
 
   function getQuestionsById($id) {
@@ -138,6 +180,15 @@ class Questions_model extends CI_Model {
     return $ifAlreadyTaken;
   }
 
+  function ifAlreadyTaken2($topicId, $userId) {
+    $ifAlreadyTaken = $this->db
+      ->where('examiner_topics', $topicId)
+      ->where('examiner_id', $userId)
+      ->get($this->examinersTable)
+      ->num_rows();
+    return $ifAlreadyTaken;
+  }
+
 
   function getQuestionsByIdAndUserId($id, $userId) {
     $getQuestionsById = $this->db
@@ -158,49 +209,13 @@ class Questions_model extends CI_Model {
         LEFT JOIN $this->choicesTable AS c ON q.question_no = c.question_no
         LEFT JOIN $this->answersTable AS a ON c.question_no = a.question_no
         LEFT JOIN $this->recordsTable AS r ON c.question_no = r.record_question_id
-        WHERE t.topic_id = $id && r.record_user_id = $userId && c.choice_text != '' ")
+        WHERE t.topic_id = $id && r.record_user_id = $userId ")
       ->result();
 
     return $getQuestionsById;
   }
 
-  function reports($page, $limit) {
-    $reports = $this->db
-      ->query("SELECT DISTINCT
-        e.examiner_topic_date_taken AS dateTaken,
-        e.examiner_score AS score,
-        u.user_id AS id,
-        u.user_name AS name,
-        t.topic_title AS title
-        FROM oes_examiners AS e
-        INNER JOIN oes_users AS u
-        ON u.user_id = e.examiner_id
-        INNER JOIN oes_topics AS t
-        ON e.examiner_topics = t.topic_id
-        WHERE e.examiner_score != '' LIMIT $page, $limit")
-      ->result();
-
-    return $reports;
-  }
-
-  function countReports() {
-    $countReports = $this->db
-      ->query("SELECT DISTINCT
-        e.examiner_topic_date_taken AS dateTaken,
-        e.examiner_score AS score,
-        u.user_id AS id,
-        u.user_name AS name,
-        t.topic_title AS title
-        FROM oes_examiners AS e
-        INNER JOIN oes_users AS u
-        ON u.user_id = e.examiner_id
-        INNER JOIN oes_topics AS t
-        ON e.examiner_topics = t.topic_id
-        WHERE e.examiner_score != ''")
-      ->num_rows();
-
-    return $countReports;
-  }
+  
 
   function getQuestionsByIdByExaminer($id, $limit, $page) {
     $getQuestionsByIdByExaminer = $this->db

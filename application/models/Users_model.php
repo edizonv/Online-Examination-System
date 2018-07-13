@@ -100,10 +100,26 @@ class Users_model extends CI_Model {
       u.user_id AS id,
       u.user_name AS name
       FROM oes_users AS u
+      LEFT JOIN oes_examiners AS e
+      ON u.user_id = e.examiner_id
+      WHERE u.user_name LIKE '%".$term."%' && u.user_position != 0
+      ")
+      ->result();
+    return $getAllExaminers;
+  }
+
+  function getAllExaminers2($term, $topicId) {
+    $getAllExaminers = $this->db
+      ->query("SELECT
+      DISTINCT
+      u.user_id AS id,
+      u.user_name AS name
+      FROM oes_users AS u
       JOIN oes_examiners AS e
       WHERE NOT EXISTS(
         SELECT 1 FROM oes_examiners AS e WHERE u.user_id = e.examiner_id
-      ) && u.user_name LIKE '%".$term."%' && e.examiner_topics = $topicId && u.user_position != 0")
+      ) && u.user_name LIKE '".$term."%' && e.examiner_topics = $topicId && u.user_position != 0
+      ")
       ->result();
     return $getAllExaminers;
   }

@@ -13,7 +13,7 @@
 				</thead>
 				<tbody>
 					<?php foreach($reports as $report): ?>
-						<tr>
+						<tr onclick="window.location = '/reports/view/<?php echo $report->eno; ?>'">
 							<td><?php echo $report->title ?></td>
 							<td><?php echo $report->name ?></td>
 							<td class="text-center"><?php echo $report->dateTaken ?></td>

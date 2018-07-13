@@ -21,95 +21,102 @@
 		<?php if($this->session->flashdata('alreadyTAken') ): ?>
 			<?php echo $this->session->flashdata('alreadyTAken'); ?>
 		<?php endif;?>
-		<div class="table-responsive">
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th>Topic</th>
-						<?php if($this->session->userdata('userPositionSessId') == 0): ?>
-							<th class="text-center">Passed</th>
-							<th class="text-center">Failed</th>
-						<?php else: ?>
-							<th class="text-center">Date Taken</th>
-							<th class="text-center">Score</th>
-						<?php endif; ?>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach($allTopics as $item): ?>
-						<?php if($item->status == 1 && $this->session->userdata('userPositionSessId') == 1): // if examiner level ?>
-							<?php if(isset($item->dateTaken) ): ?>
-								<tr onclick="window.location = '/questions/view/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+		<?php if($allTopics): ?>
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>Topic</th>
+							<?php if($this->session->userdata('userPositionSessId') == 0): ?>
+								<th class="text-center">Passed</th>
+								<th class="text-center">Failed</th>
 							<?php else: ?>
-								<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+								<th class="text-center">Date Taken</th>
+								<th class="text-center">Score</th>
 							<?php endif; ?>
-								<td class="col-md-8"><?php echo $item->title ?></td>
-								<?php if($this->session->userdata('userPositionSessId') == 0): ?>
-									<td class="text-center">1</td>
-									<td class="text-center">2</td>
-								<?php else: ?>
-									<td class="text-center"><?php 
-									if(isset($item->dateTaken) ) {
-										echo date("M d, Y h:i:s", strtotime($item->dateTaken) );
-									} else {
-										echo "N/A";
-									}
+						</tr>
+					</thead>
+					<tbody>
 
-									?></td>
-									<td class="text-center">
-									<?php 
-									if(isset($item->escore) ) {
-										if($item->escore != "") {
-											$percentage = ($totalQ * .8);
-										    if($item->escore >= $percentage) {
-										      echo '<button type="button" class="btn btn-success">Passed <span class="badge">'.$item->escore.'</span></button>';
-										    } else {
-										      echo '<button type="button" class="btn btn-danger">Failed <span class="badge">'.$item->escore.'</span></button>';
-										    }
+						<?php foreach($allTopics as $item): ?>
+							<?php if($this->session->userdata('userPositionSessId') == 1): // if examiner level ?>
+								<?php if(isset($item->escore) ): ?>
+									<tr onclick="window.location = '/questions/view/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+								<?php else: ?>
+									<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+								<?php endif; ?>
+									<td class="col-md-8"><?php echo $item->title ?></td>
+									<?php if($this->session->userdata('userPositionSessId') == 0): ?>
+										<td class="text-center">1</td>
+										<td class="text-center">2</td>
+									<?php else: ?>
+										<td class="text-center"><?php 
+										if(isset($item->dateTaken) ) {
+											echo date("M d, Y h:i:s", strtotime($item->dateTaken) );
 										} else {
 											echo "N/A";
 										}
-									}
-									?>
+
+										?></td>
+										<td class="text-center">
+										<?php 
+										if(isset($item->escore) ) {
+											if($item->escore != "") {
+												
+											    if($item->estat == 1) {
+											      echo '<button type="button" class="btn btn-success">Passed <span class="badge">'.$item->escore.'</span></button>';
+											    } else {
+											      echo '<button type="button" class="btn btn-danger">Failed <span class="badge">'.$item->escore.'</span></button>';
+											    }
+											} else {
+												echo "N/A";
+											}
+										}
+										?>
+										</td>
+									<?php endif; ?>
+								</tr>
+							<?php elseif($this->session->userdata('userPositionSessId') == 0): // if admin level ?>
+								<tr onclick="window.location = '/questions/manage/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+									<td class="col-md-8"><?php echo $item->title ?></td>
+									
+									<td class="text-center bg-passed">
+										<?php 
+										$count = 0;
+										foreach($scores as $key => $score) {
+											if($item->id == $score->topic) {
+												if($score->status == 1) {
+													$count++;
+												}
+											}
+										}
+										echo $count;
+										 ?>
 									</td>
-								<?php endif; ?>
-							</tr>
-						<?php elseif($this->session->userdata('userPositionSessId') == 0): // if admin level ?>
-							<tr onclick="window.location = '/questions/manage/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
-								<td class="col-md-8"><?php echo $item->title ?></td>
-								
-								<td class="text-center bg-passed">
-									<?php 
-									$count = 0;
-									foreach($scores as $key => $score) {
-										if($item->id == $score->topic) {
-											if($score->status == 1) {
-												$count++;
+									<td class="text-center bg-failed">
+										<?php 
+										$count = 0;
+										foreach($scores as $key => $score) {
+											if($item->id == $score->topic) {
+												if($score->status == 0) {
+													$count++;
+												}
 											}
 										}
-									}
-									echo $count;
-									 ?>
-								</td>
-								<td class="text-center bg-failed">
-									<?php 
-									$count = 0;
-									foreach($scores as $key => $score) {
-										if($item->id == $score->topic) {
-											if($score->status == 0) {
-												$count++;
-											}
-										}
-									}
-									echo $count;
-									 ?>
-								</td>
-							</tr>
-						<?php endif; ?>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
+										echo $count;
+										 ?>
+									</td>
+								</tr>
+							<?php endif; ?>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			</div>
+		<?php else: ?>
+			<div class="alert alert-warning">
+				You dont have a topic yet!
+			</div>
+		<?php endif; ?>
 	</div>
 		<?php echo $links; ?>
 </div>
