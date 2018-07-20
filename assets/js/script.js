@@ -6,6 +6,7 @@
 
 
 $(function() {
+
 	$( ".autocomplete" ).typeahead({	/*	gawing typeahead yung autocomplete	*/
 		items: 10,	//no. of records to display.
 		source: function(request, response) {
@@ -97,6 +98,41 @@ $(function() {
 					} else {
 						$('.resultMsg').html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Question available!</div>");
 						$('#newQuestionModal .btn-primary').attr('type', 'submit');
+					}
+				
+				}
+			});
+		},
+		matcher: function() {	/*	search using objects.	*/
+			return true;
+		}
+	});
+
+	$( ".title" ).typeahead({	/*	gawing typeahead yung autocomplete	*/
+		items: 10,	//no. of records to display.
+		source: function(request, response) {
+			$.ajax({ 
+				url: "http://localhost/questions/ifTitleExist",
+				data: { 
+					term: $(".title").val(),
+					oldTitle: $("#oldTitle").val()
+				},
+				dataType: "json",
+				type: "POST",
+				success: function(data){
+					// response(data);
+					if(data) {
+						$(window).keydown(function(event){
+						    if(event.keyCode == 13) {
+						      event.preventDefault();
+						      return false;
+						    }
+						 });
+						$('.resultMsg').html("<div class='alert alert-warning'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Title already exist!</div>");
+						$('#titleModal .btn-primary').attr('type', 'button');
+					} else {
+						$('.resultMsg').html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>Title available!</div>");
+						$('#titleModal .btn-primary').attr('type', 'submit');
 					}
 				
 				}

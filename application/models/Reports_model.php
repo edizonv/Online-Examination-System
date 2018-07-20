@@ -3,6 +3,8 @@
 class Reports_model extends CI_Model {
 
   public $examinersTable = 'oes_examiners';
+  public $usersTable  = 'oes_users';
+  public $topicsTable = 'oes_topics';
 
  function reports($page, $limit) {
     $reports = $this->db
@@ -42,8 +44,6 @@ class Reports_model extends CI_Model {
     return $countReports;
   }
 
- 
-
  function searchHistory($term, $page, $limit) {
     $reports = $this->db
       ->query("SELECT DISTINCT
@@ -81,6 +81,36 @@ class Reports_model extends CI_Model {
       ->num_rows();
 
     return $countReports;
+  }
+
+  function getAllUsers() {
+    $getAllExaminersById = $this->db
+      ->get($this->usersTable)
+      ->num_rows();
+    return $getAllExaminersById;
+  }
+
+  function getGoogleUsers() {
+    $getGoogleUsers = $this->db
+      ->where('user_google_login', 1)
+      ->get($this->usersTable)
+      ->num_rows();
+    return $getGoogleUsers;
+  }
+
+  function getRegisteredUsers() {
+    $getRegisteredUsers = $this->db
+      ->where('user_google_login', 0)
+      ->get($this->usersTable)
+      ->num_rows();
+    return $getRegisteredUsers;
+  }
+
+  function getAllTopics() {
+    $getAllTopics = $this->db
+      ->get($this->topicsTable)
+      ->num_rows();
+    return $getAllTopics;
   }
 
 }

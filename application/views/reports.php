@@ -1,6 +1,7 @@
 <div class="panel panel-primary">
 	<div class="panel-heading text-uppercase"><strong>Reports</strong></div>
 	<div class="panel-body">
+		<?php if($reports): ?>
 		<div class="table-responsive">
 			<table class="table table-hover table-bordered">
 				<thead>
@@ -13,7 +14,7 @@
 				</thead>
 				<tbody>
 					<?php foreach($reports as $report): ?>
-						<tr onclick="window.location = '/reports/view/<?php echo $report->eno; ?>'">
+						<tr onclick="window.location = '/questions/view/<?php echo $this->uri->segment(3); ?>/<?php echo $report->id; ?>'">
 							<td><?php echo $report->title ?></td>
 							<td><?php echo $report->name ?></td>
 							<td class="text-center"><?php echo $report->dateTaken ?></td>
@@ -23,6 +24,9 @@
 				</tbody>
 			</table>
 		</div>
+		<?php else: ?>
+			<div class="alert alert-warning">No history yet.</div>
+		<?php endif; ?>
 	</div>
 	<?php echo $links; ?>
 </div>

@@ -11,6 +11,11 @@
   <?php if(! $this->session->userData('userSessId') ): ?>
     <style>
       body {background: #d9534f;}
+      @media screen and (max-width:767px) {
+        body {
+          padding-top: 0;
+        }
+      }
     </style>
   <?php endif; ?>
   <script src='https://www.google.com/recaptcha/api.js'></script>
@@ -54,7 +59,7 @@
                 <button class="btn btn-link dropdown-toggle" type="button" data-toggle="dropdown">Login as <strong id="loginAs"><?php echo $this->session->userdata('userSessId'); ?></strong>
                 <span class="caret"></span></button>
                 <ul class="dropdown-menu">
-                  <li><a href="#"><i class="fa fa-lock"></i> Account</a></li>
+                  <li><a href="#"><i class="fa fa-lock"></i> Change Password</a></li>
                   <li><div class="divider"></div></li>
                   <li><a href="<?php echo base_url().'users/logout' ?>" onclick="signOut();"><i class="fa fa-power-off"></i> Logout</a></li>
                 </ul>

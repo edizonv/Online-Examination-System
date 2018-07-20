@@ -26,47 +26,52 @@
 			
 					<?php $columns = array(); ?>
 
-					<?php foreach($questions as $rows): ?>
+					<?php foreach($questions as $key => $rows): ?>
+				
+						<?php if($questions[$key]->no == $rows->no): ?>
+								<?php if($this->session->userdata('topicid') == $rows->id): ?>
 
-						<?php if($this->session->userdata('topicid') == $rows->id): ?>
-
-							<?php if(isset($topic->duration) ): ?>
-								<?php $duration = explode(':', $topic->duration); ?>
-								<input type="hidden" name="hiddenH" id="hiddenH" value="<?php echo $duration[0]; ?>">
-								<input type="hidden" name="hiddenM" id="hiddenM" value="<?php echo $duration[1]; ?>">
-								<input type="hidden" name="startDate" id="startDate" value="<?php echo $this->session->userdata('startDate'); ?>">
-							<?php endif; ?>
-
-							<?php if ($rows->questions): ?>
-								<?php if (!isset($columns[$rows->questions]) ): ?>
-									<p class="<?php if($rows->qstat == 0): ?> disabled <?php endif; ?>">
-									<?php if($this->session->userdata('userPositionSessId') == 0): // examiners only ?>
-										<a href="/questions/edit/<?php echo $rows->id ?>/<?php echo $rows->no ?>"><i class="fa fa-pencil"></i> </a>
+									<?php if(isset($topic->duration) ): ?>
+										<?php $duration = explode(':', $topic->duration); ?>
+										<input type="hidden" name="hiddenH" id="hiddenH" value="<?php echo $duration[0]; ?>">
+										<input type="hidden" name="hiddenM" id="hiddenM" value="<?php echo $duration[1]; ?>">
+										<input type="hidden" name="startDate" id="startDate" value="<?php echo $this->session->userdata('startDate'); ?>">
 									<?php endif; ?>
-									<strong><?php echo $rows->questions; ?></strong></p>
-									<?php $columns[$rows->questions] = true; ?>
-								<?php endif; ?>
-							
-							<?php endif; ?>
-							<?php if($rows->choices && $rows->choicesText): ?>
-								<?php foreach($getChoices as $c): ?>
-									<?php if ($c->no == $rows->no): ?>
-										<p><input type="radio" name="selectedChoices[]" value="<?php echo $c->choice ?>"><?php echo $c->choice. '. ' . $c->choices ?></p>
+
+									<?php if ($rows->questions): ?>
+										<?php if (!isset($columns[$rows->questions]) ): ?>
+											<p class="<?php if($rows->qstat == 0): ?> disabled <?php endif; ?>">
+											<?php if($this->session->userdata('userPositionSessId') == 0): // examiners only ?>
+												<a href="/questions/edit/<?php echo $rows->id ?>/<?php echo $rows->no ?>"><i class="fa fa-pencil"></i> </a>
+											<?php endif; ?>
+											<strong><?php echo $rows->questions; ?></strong></p>
+											<?php $columns[$rows->questions] = true; ?>
+										<?php endif; ?>
+									
 									<?php endif; ?>
-								<?php endforeach; ?>
-							<?php else: ?>
-								<?php if($rows->type == 3): ?>
-									<textarea name="paragraph" class="form-control"></textarea>
+									<?php if($rows->choices && htmlspecialchars($rows->choicesText) ): ?>
+										<?php foreach($getChoices as $c): ?>
+											<?php if ($c->no == $rows->no): ?>     
+												<p><input type="radio" name="selectedChoices[]" value="<?php echo $c->choice; ?>"><?php echo $c->choice. '. ' . htmlspecialchars($c->choices) ?></p>
+												<input type="hidden" name="letters[]" value="<?php echo $c->no; ?>">
+											<?php endif; ?>
+										<?php endforeach; ?>
+									<?php else: ?>
+										<?php if($rows->type == 3): ?>
+											<textarea name="paragraph" class="form-control"></textarea>
+										<?php endif; ?>
+									<?php endif; ?>
+
+								<?php else: ?>
+
+									<div class="alert alert-warning">
+										<p>You can only take 1 exam at a time.</p>
+									</div>
+
 								<?php endif; ?>
 							<?php endif; ?>
-
-						<?php else: ?>
-
-							<div class="alert alert-warning">
-								<p>You can only take 1 exam at a time.</p>
-							</div>
-
-						<?php endif; ?>
+							<input type="hidden" name="hiddenNo" value="<?php echo $rows->no; ?>">
+						
 
 					<?php endforeach; ?>
 

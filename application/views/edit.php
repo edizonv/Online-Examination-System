@@ -33,7 +33,7 @@
 									</div>
 									<div class="col-md-11 col-xs-10">
 										<div class="form-group">
-											<textarea name="question" class="form-control"><?php echo $rows->questions; ?></textarea>
+											<textarea name="question" class="form-control"><?php echo htmlspecialchars($rows->questions); ?></textarea>
 										</div>
 									</div>
 								</div>
@@ -43,10 +43,10 @@
 							<?php if($rows->choices && $rows->choicesText): ?>
 								<div class="row">
 									<div class="col-md-1 col-xs-2">
-										<label><?php echo $rows->choices; ?> <input type="radio" name="choice" value="<?php echo $rows->choices; ?>" <?php if($rows->choices == $rows->answer): ?>	CHECKED <?php endif; ?>></label>
+										<label><?php echo $rows->choices; ?> <input type="radio" name="choice" value="<?php echo htmlspecialchars($rows->choices); ?>" <?php if($rows->choices == $rows->answer): ?>	CHECKED <?php endif; ?>></label>
 									</div>
 									<div class="col-md-11 col-xs-9">
-										<div class="form-group"><input type="text" class="form-control" name="choiceText[]" value="<?php echo $rows->choicesText; ?>"></div>
+										<div class="form-group"><input type="text" class="form-control" name="choiceText[]" value="<?php echo htmlspecialchars($rows->choicesText); ?>"></div>
 									</div>
 								</div>
 							<?php endif; ?>
@@ -72,7 +72,8 @@
 								</div>
 							</div>
 						</div>
-						<button class="btn btn-primary pull-right">Update</button>
+						<a href="/questions/manage/<?php echo $this->uri->segment(3); ?>" class="btn pull-right">Back</a>
+						<button class="btn btn-primary pull-right" onclick="return confirm('Do you like to continue?')">Update</button>
 					</form>
 				<?php else: ?>
 					<div class="alert alert-warning"><p>No question yet! <a href="/questions/add">Add Question</p></div>

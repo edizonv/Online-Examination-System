@@ -6,9 +6,9 @@
 		
 			<div class="col-md-3">
 				<div class="list-group">
-					<p class="menu">DASHBOARD</p>
+					<p class="menu">MAIN NAVIGATION</p>
 					<?php if($this->session->userdata('userPositionSessId') == 0): // admin only ?>
-						<a href="/" class="list-group-item <?php if($this->uri->segment(1) == '' || $this->uri->segment(1) == 'questions' && $this->uri->segment(1) != "questions"): ?>active<?php endif; ?>"><i class="fa fa-bar-chart"></i> Statistics</a>
+						<a href="/" class="list-group-item <?php if($this->uri->segment(1) == '' || $this->uri->segment(1) == 'questions' && $this->uri->segment(1) != "questions"): ?>active<?php endif; ?>"><i class="fa fa-bar-chart"></i> Dashboard</a>
 						<a href="/questions/all" class="list-group-item <?php if($this->uri->segment(2) == 'all' || $this->uri->segment(2) == 'results' || $this->uri->segment(2) == 'manage' || $this->uri->segment(2) == 'edit'): ?>active<?php endif; ?>"><i class="fa fa-bookmark"></i> Questionnaires</a>
 					<?php else: ?>
 						<a href="/" class="list-group-item <?php if($this->uri->segment(1) == '' || $this->uri->segment(1) == 'questions' && $this->uri->segment(2) != "all" &&  $this->uri->segment(2) != 'takenow' &&  $this->uri->segment(2) != 'instructions'  &&  $this->uri->segment(2) != 'view'): ?>active<?php endif; ?>"><i class="fa fa-user"></i> My Profile</a>

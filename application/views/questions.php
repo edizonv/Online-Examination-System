@@ -41,9 +41,9 @@
 						<?php foreach($allTopics as $item): ?>
 							<?php if($this->session->userdata('userPositionSessId') == 1): // if examiner level ?>
 								<?php if(isset($item->escore) ): ?>
-									<tr onclick="window.location = '/questions/view/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+									<tr onclick="window.location = '/questions/view/<?php echo $item->id ?>'">
 								<?php else: ?>
-									<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'" <?php  if($item->status == 0) echo "class='bg-danger'"; ?> >
+									<tr onclick="window.location = '/questions/instructions/<?php echo $item->id ?>'">
 								<?php endif; ?>
 									<td class="col-md-8"><?php echo $item->title ?></td>
 									<?php if($this->session->userdata('userPositionSessId') == 0): ?>
@@ -62,7 +62,6 @@
 										<?php 
 										if(isset($item->escore) ) {
 											if($item->escore != "") {
-												
 											    if($item->estat == 1) {
 											      echo '<button type="button" class="btn btn-success">Passed <span class="badge">'.$item->escore.'</span></button>';
 											    } else {

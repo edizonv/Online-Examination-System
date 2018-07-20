@@ -28,12 +28,14 @@ class Users extends CI_Controller {
 					$password = $formData['userPass'];
 					if (password_verify($password, $userPass) ) {
 						$this->session->set_userdata('userSessId', $userUname);
-						if($getUser->user_position == 0) {
-							$this->Users_model->updateLastLogin($getUser->email);
-							$this->session->set_userdata('userIDSess', $getUser->id);
-							$this->session->set_userdata('userLastLoggedInSessId', date("Y-m-d H:i:s") );
+						if($getUser->position == 0 && $getUser->id == 1) {
 							$this->session->set_userdata('userPositionSessId', $getUser->position);
+						} else {
+							$this->session->set_userdata('userPositionSessId', 1);
 						}
+						$this->session->set_userdata('userLastLoggedInSessId', date("Y-m-d H:i:s") );
+						$this->Users_model->updateLastLogin($getUser->email);
+						$this->session->set_userdata('userIDSess', $getUser->id);
 						redirect(base_url().'questions' );
 					}
 					else {
@@ -58,6 +60,7 @@ class Users extends CI_Controller {
 	function insertGoogleInfo() {
 		$data = $this->input->post();
 		$this->Users_model->loginWithGoogle($data);
+
 		$this->session->set_userdata('userLastLoggedInSessId', date("Y-m-d H:i:s") );
 		$this->Users_model->updateLastLogin($data['user_email']);
 		$this->session->set_userdata('userSessId', $data['user_uname']);

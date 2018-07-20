@@ -1,11 +1,12 @@
 <?php if($this->session->userdata('userPositionSessId') == 0): // admin only ?>
 <div class="panel panel-primary<?php if($topic->status == 0) echo " disable";  ?>" id="topicInfo">
-	<div class="panel-heading text-uppercase"><strong><?php echo $topic->title . ' (' . $topic->duration.')'; ?></strong>
+	<div class="panel-heading"><strong><?php echo $topic->title . ' ( Duration : ' . $topic->duration.' )'; ?></strong>
 	<div class="dropdown pull-right">
 	  <a class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">ACTION <span class="caret"></span></a>
 	  <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
 	  	<?php if($questions[0]->status): ?>
-		    <li><a href="#" class="white" data-toggle="modal" data-target="#durationModal"><i class="fa fa-plus"></i> UPDATE DURATION</a></li>
+		    <li><a href="#" class="white" data-toggle="modal" data-target="#titleModal"><i class="fa fa-edit"></i> UPDATE TITLE</a></li>
+		    <li><a href="#" class="white" data-toggle="modal" data-target="#durationModal"><i class="fa fa-edit"></i> UPDATE DURATION</a></li>
 		    <li><a href="#" class="white" data-toggle="modal" data-target="#newQuestionModal"><i class="fa fa-plus"></i> NEW QUESTION</a></li>
 		    <?php if($topic->duration ): ?>
 		    	<li><a href="#" class="white" data-toggle="modal" data-target="#newExaminersModal"><i class="fa fa-plus"></i> ADD EXAMINER</a></li>
@@ -13,7 +14,7 @@
 		    <li><a href="/reports/history/<?php echo $this->uri->segment('3') ?>" class="white"><i class="fa fa-search"></i> EXAM HISTORY</a></li>
 	    	<li class="divider"></li>
 	    <?php endif; ?>
-	    <li><a tabindex="-1" href="/questions/status/<?php echo $this->uri->segment(3); ?>/<?php echo $topic->status ?>"><i class="fa fa-power-off"></i><?php if($topic->status == 1): ?> DISABLE <?php else: ?> ENABLE <?php endif; ?></a></li>
+	    <li><a tabindex="-1" href="/questions/status/<?php echo $this->uri->segment(3); ?>/<?php echo $topic->status ?>" onclick="return confirm('Do yo like to continue?')"><i class="fa fa-power-off"></i><?php if($topic->status == 1): ?> DISABLE <?php else: ?> ENABLE <?php endif; ?></a></li>
 	  </ul>
 	</div>
 </div>
@@ -27,6 +28,10 @@
 			<div class="col-md-12">
 				<?php if($this->session->flashdata('questionStatusUpdated') ): ?>
 					<?php echo $this->session->flashdata('questionStatusUpdated'); ?>
+				<?php endif;?>
+			</div><div class="col-md-12">
+				<?php if($this->session->flashdata('topicTitleUpdated') ): ?>
+					<?php echo $this->session->flashdata('topicTitleUpdated'); ?>
 				<?php endif;?>
 			</div>
 			<div class="col-md-12">
@@ -46,11 +51,11 @@
 			</div>
 			<div class="col-md-12">
 				<?php if($questions[0]->status): ?>
-					<?php $columns = array(); ?>
+					<?php $columns = array(); $count = 1; ?>
 					<?php foreach($questions as $rows): ?>
 						<?php if ($rows->questions): ?>
 							<?php if (!isset($columns[$rows->questions]) ): ?>
-								<p class="hr <?php if($rows->qstat == 0): ?> disabled <?php endif; ?>"><a href="/questions/edit/<?php echo $rows->id ?>/<?php echo $rows->no ?>"><i class="fa fa-pencil"></i> </a><strong><?php echo $rows->questions; ?></strong> <?php if($rows->answer): ?><strong class="pull-right"><?php echo $rows->answer; ?></strong><?php endif; ?></p>
+								<p class="hr <?php if($rows->qstat == 0): ?> disabled <?php endif; ?>"><a href="/questions/edit/<?php echo $rows->id ?>/<?php echo $rows->no ?>"><i class="fa fa-pencil"></i> </a><strong><?php echo $count++. '.) ' . $rows->questions; ?></strong> <?php if($rows->answer): ?><strong class="pull-right"><?php echo $rows->answer; ?></strong><?php endif; ?></p>
 								<?php $columns[$rows->questions] = true; ?>
 							<?php endif; ?>
 						<?php else: ?>
@@ -58,7 +63,7 @@
 						<?php endif; ?>
 						
 						<?php if($rows->choices && $rows->choicesText): ?>
-							<p class="<?php if($rows->qstat == 0): ?> disabled <?php endif; ?>"><?php echo $rows->choices . '. ' . $rows->choicesText; ?></p>
+							<p class="<?php if($rows->qstat == 0): ?> disabled <?php endif; ?>"><?php echo $rows->choices . '. ' . htmlspecialchars($rows->choicesText); ?></p>
 						<?php else: ?>
 							<?php if($rows->type == 3): ?>
 								<p class="text-info pull-right"><small><strong>This will be answer by paragraph.</strong></small></p>
@@ -119,6 +124,35 @@
 	        	</div>
         	</div>
         	
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<div id="titleModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h5 class="modal-title">UPDATE TITLE</h5>
+      </div>
+      <div class="modal-body">
+        <form action="/questions/updateTitle" method="POST">
+        	<div class="form-group">
+        		<input type="text" name="term" id="term" class="form-control title" required placeholder="Enter title here..." autocomplete="off" value="<?php echo $topic->title; ?>">
+        		<input type="hidden" name="oldTitle" id="oldTitle" value="<?php echo $topic->title; ?>">
+        	</div>
+			<div class="form-group resultMsg"></div>
+        	<div class="form-group text-right">
+        		<button type="reset" class="btn">Clear</button>
+        		<input type="hidden" name="hiddenID" id="hiddenID" value="<?php echo $this->uri->segment(3); ?>">
+        		<button type="button" class="btn btn-primary">Submit</button>
+        	</div>
         </form>
       </div>
     </div>

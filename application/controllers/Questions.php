@@ -9,7 +9,8 @@ class Questions extends CI_Controller {
 			redirect(base_url().'users/login');
 		} else {
       $this->load->model('Questions_model');
-			$this->load->model('Users_model');
+      $this->load->model('Users_model');
+			$this->load->model('Reports_model');
 		}
 	}
 
@@ -19,11 +20,17 @@ class Questions extends CI_Controller {
     
   function home() {
 
+    $data['users'] = $this->Reports_model->getAllUsers();
+    $data['google'] = $this->Reports_model->getGoogleUsers();
+    $data['topics'] = $this->Reports_model->getAllTopics();
+    $data['registered'] = $this->Reports_model->getRegisteredUsers();
+
     $this->template->set('title', 'Home');
-	   $this->template->load('template', 'home');
+    $this->template->load('template', 'home', $data);
   }
 
-  function all() {  		
+  function all() {  
+
 		$this->load->library('pagination');
 		$config['full_tag_open'] 		= 	"<ul class='pagination pull-right'>";
 		$config['full_tag_close'] 	=		"</ul>";
@@ -39,16 +46,18 @@ class Questions extends CI_Controller {
 		$config['first_tagl_close'] = 	"</li>";
 		$config['last_tag_open'] 		= 	"<li>";
 		$config['last_tagl_close'] 	= 	"</li>";
-		$config["base_url"] = base_url() . "Questions/all";
+		$config["base_url"]         =   base_url() . "Questions/all";
+
     if ($this->session->userdata('userPositionSessId') == 1 ) {
       $config["total_rows"] = $this->Questions_model->countAllTopics2($this->session->userdata('userIDSess') )->num_rows();
     } else {
 		 $config["total_rows"] = $this->Questions_model->countAllTopics()->num_rows();
     }
-	   $config["per_page"] = 10;
-		$config['uri_segment'] = 3;
-    $data['totalQ'] = $config["total_rows"];
-		$limit = $config['per_page'];
+
+    $config["per_page"]     =   10;
+    $config['uri_segment']  =   3;
+    $data['totalQ']         =   $config["total_rows"];
+    $limit                  =   $config['per_page'];
 
 		$this->pagination->initialize($config);
 
@@ -59,9 +68,7 @@ class Questions extends CI_Controller {
     if ($this->session->userdata('userPositionSessId') == 1 ) {
       $data['allTopics'] = $this->Questions_model->getAllTopicsById($page, $limit, $this->session->userdata('userIDSess') )->result();
     } else {
-      
-       $data['scores'] = $this->Questions_model->getScores();
-
+      $data['scores'] = $this->Questions_model->getScores();
       $data['allTopics'] = $this->Questions_model->getAllTopics($page, $limit)->result();
     }
 
@@ -93,6 +100,21 @@ class Questions extends CI_Controller {
   	$data = $this->input->post();
 		$results = $this->Questions_model->ifQuestionExist($data);
 		echo $results->num_rows();
+  }
+
+  function ifTitleExist() {
+    $data = $this->input->post();
+    $results = $this->Questions_model->ifTitleExist($data);
+    echo $results->num_rows();
+  }
+
+  function updateTitle() {
+    $data['title'] = $this->input->post('term');
+    $data['id']   = $this->input->post('hiddenID');
+    if($this->Questions_model->updateTitle($data) ) {
+      $this->session->set_flashdata('topicTitleUpdated', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Title Updated!</div>');
+      redirect(base_url(). 'questions/manage/'.$data['id']);
+    }
   }
 
   function ifChoiceExist() {
@@ -317,8 +339,6 @@ class Questions extends CI_Controller {
 
 
   function takenow($id) {
-    // unset($_SESSION['cqID']);
-    // unset($_SESSION['selectedChoices']);
     $uri3 = $this->uri->segment(3);
    
     if(!$this->uri->segment(4) || $this->uri->segment(4) == 0) {
@@ -390,7 +410,8 @@ class Questions extends CI_Controller {
     $uri3 = $this->uri->segment(3);
    
     $_SESSION['hiddenTotal'] = $this->input->post('hiddenTotal');
-
+    $_SESSION['hiddenNo'][] = $this->input->post('hiddenNo');
+    
     if($this->uri->segment(4) ) {
       if(!$this->session->userdata('cqID') ) {
         $this->session->set_userdata('cqID', 0);
@@ -400,6 +421,8 @@ class Questions extends CI_Controller {
         if($this->input->post('selectedChoices') ) {
          
           $_SESSION['selectedChoices'][] = $this->input->post('selectedChoices');
+          $_SESSION['letters'][] = $this->input->post('letters');
+          
         } else {
          // $_SESSION['selectedChoices'][] = $this->input->post('selectedChoices');
         }
@@ -423,14 +446,22 @@ class Questions extends CI_Controller {
       if($this->input->post('submitExam') ) {
         
         $_SESSION['selectedChoices'][] = $this->input->post('selectedChoices');
+        $_SESSION['letters'][] = $this->input->post('letters');
+
         redirect(base_url().'questions/recordExam/'.$uri3 . '/');
       }
     }
   }
 
-  function view($id) {
-    $userId = $this->session->userdata('userIDSess');
-    $results['questions'] = $this->Questions_model->getQuestionsByIdAndUserId($id, $userId);
+  function view() {
+    $id = $this->uri->segment(3);
+    $id2 = $this->uri->segment(4);
+    if ($this->session->userdata('userPositionSessId') == 1 ) {
+      $userId = $this->session->userdata('userIDSess');
+      $results['questions'] = $this->Questions_model->getQuestionsByIdAndUserId($id, $userId);
+    } else {
+      $results['questions'] = $this->Questions_model->getTopicHistoryById($id, $id2);
+    }
 
     $results['topic'] = $this->Questions_model->getTopicById($id);
     $this->template->set('title', 'Mangage Questionnaires');
@@ -483,11 +514,20 @@ class Questions extends CI_Controller {
       $ans[] .=  $sc[0];
       $keys[] .= ($key+1);
     }
-    $this->Questions_model->recordExam($ans, $this->uri->segment(3), $keys);
+
+    $ans2 = '';
+    $_SESSION['letters'][] = $this->input->post('letters');
+    foreach($_SESSION['letters'] as $key => $rexam) {
+      $ans2[] .=  $rexam[0];
+    }
+
+ 
+    $this->Questions_model->recordExam($ans, $this->uri->segment(3), $ans2, $keys);
     $this->session->set_flashdata('examFinished', '<div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>Exam Done!</div>');
     
     unset($_SESSION['cqID']);
     unset($_SESSION['selectedChoices']);
+    unset($_SESSION['letters']);
     unset($_SESSION['start']);
     unset($_SESSION['hiddenTotal']);
     redirect(base_url().'questions/all');

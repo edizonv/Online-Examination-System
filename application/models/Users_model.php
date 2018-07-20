@@ -37,18 +37,32 @@ class Users_model extends CI_Model {
       ->get($this->usersTable)
       ->num_rows();
     if ($ifExists == 0) {
+      $this->session->set_userdata('userPositionSessId', 1);
       $data = [
         'user_name'         => $data['user_name'],
         'user_email'        => $data['user_email'],
         'user_uname'        => $data['user_uname'],
         'user_google_login' => 1,
         'user_status'       => 1,
+        'user_position'     => 1,
         'user_last_login'   =>  date("Y-m-d H:i:s")
       ];
       $loginWithGoogle = $this->db->insert($this->usersTable, $data);
       return $loginWithGoogle;
     } else {
-       
+        $ifAdmin = $this->db
+          ->where('user_email', $data['user_email'])
+          ->where('user_status', 1)
+          ->get($this->usersTable)
+          ->row();
+        if($ifAdmin->user_position == 0) {
+          $this->session->set_userdata('userIDSess', $ifAdmin->user_id);
+          $this->session->set_userdata('userPositionSessId', 0);
+        } else {
+          $this->session->set_userdata('userIDSess', $ifAdmin->user_id);
+          $this->session->set_userdata('userPositionSessId', 1);
+        }
+        
     }
   }
 
@@ -135,4 +149,6 @@ class Users_model extends CI_Model {
       ->result();
     return $getAllExaminersById;
   }
+
+  
 }

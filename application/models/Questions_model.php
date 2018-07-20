@@ -48,6 +48,16 @@ class Questions_model extends CI_Model {
     return $ifQuestionExist;
   }
 
+  function ifTitleExist($data) {
+    $ifTitleExist = $this->db
+      ->select('topic_title AS title')
+      ->from($this->topicsTable)
+      ->where('topic_title', $data['term'])
+      ->where('topic_title !=', $data['oldTitle'])
+      ->get();
+    return $ifTitleExist;
+  }
+
   function ifChoiceExist($data = []) {
     $ifChoiceExist = $this->db
       ->select('choice_text AS choice')
@@ -208,11 +218,38 @@ class Questions_model extends CI_Model {
         LEFT JOIN $this->questionsTable AS q ON t.topic_id = q.question_id
         LEFT JOIN $this->choicesTable AS c ON q.question_no = c.question_no
         LEFT JOIN $this->answersTable AS a ON c.question_no = a.question_no
-        LEFT JOIN $this->recordsTable AS r ON c.question_no = r.record_question_id
-        WHERE t.topic_id = $id && r.record_user_id = $userId ")
+        LEFT JOIN $this->recordsTable AS r ON c.question_no = r.record_id
+        WHERE t.topic_id = $id && r.record_user_id = $userId && c.choice_text != '' && r.record_topic_id = $id")
       ->result();
 
     return $getQuestionsById;
+  }
+
+  function getTopicHistoryById($id, $userId) {
+    $getTopicHistoryById = $this->db
+      ->query("SELECT DISTINCT t.topic_id AS id,
+        t.topic_title AS title,
+        t.topic_date_added AS dateAdded,
+        t.topic_status AS status,
+        q.question_no AS no,
+        q.question_question AS questions,
+        q.question_status AS qstat,
+        c.choice_choice AS choices,
+        c.choice_type AS type,
+        c.choice_text AS choicesText,
+        a.answer_answer AS answer,
+        r.record_answer AS recordAnswer,
+        u.user_name AS userName
+        FROM $this->topicsTable AS t
+        LEFT JOIN $this->questionsTable AS q ON t.topic_id = q.question_id
+        LEFT JOIN $this->choicesTable AS c ON q.question_no = c.question_no
+        LEFT JOIN $this->answersTable AS a ON c.question_no = a.question_no
+        LEFT JOIN $this->recordsTable AS r ON c.question_no = r.record_id
+        LEFT JOIN $this->usersTable AS u ON u.user_id = r.record_user_id
+        WHERE r.record_user_id = $userId && r.record_topic_id = $id ")
+      ->result();
+
+    return $getTopicHistoryById;
   }
 
   
@@ -235,7 +272,7 @@ class Questions_model extends CI_Model {
         LEFT JOIN oes_choices AS c ON q.question_no = c.question_no
         LEFT JOIN oes_answers AS a ON c.question_no = a.question_no
         LEFT JOIN oes_examiners AS e ON t.topic_id = e.examiner_id
-        WHERE q.question_id = $id && q.question_status = 1 && c.choice_id = $id GROUP BY q.question_question ORDER BY q.question_no ASC LIMIT $page, $limit")
+        WHERE q.question_id = $id && q.question_status = 1 && c.choice_id = $id GROUP BY q.question_question ORDER BY q.question_no LIMIT $page, $limit")
       ->result();
 
     return $getQuestionsByIdByExaminer;
@@ -268,7 +305,7 @@ class Questions_model extends CI_Model {
 
   function getQuestionsByQuestionID($id) {
     $getQuestionsByQuestionID = $this->db
-      ->query("SELECT question_no AS no, choice_choice AS choice, choice_text AS choices FROM oes_choices")
+      ->query("SELECT question_no AS no, choice_no AS cno, choice_choice AS choice, choice_text AS choices FROM oes_choices")
       ->result();
 
     return $getQuestionsByQuestionID;
@@ -469,16 +506,17 @@ class Questions_model extends CI_Model {
     return $updateExamDateTaken;
   }
 
-  function recordExam($data = [], $uri3, $key) {
+  function recordExam($data = [], $uri3, $key, $no) {
     error_reporting(1); //hide the last loop.
-
+print_r($key[$x]);
     $setDatas = [];
     for($x = 0; $x < count($data); $x++) {
       if($data[$x] != "") {
         $setData = [
+          'record_id' =>  $key[$x],
           'record_user_id'  =>  $this->session->userdata('userIDSess'),
           'record_topic_id' =>  $uri3,
-          'record_question_id'  =>  $key[$x],
+          'record_question_id'  =>  $no[$x],
           'record_answer' =>  $data[$x]
         ];
       }
@@ -491,8 +529,8 @@ class Questions_model extends CI_Model {
       ->result();
 
 
-    foreach($getAnswers as $key => $answers) {
-      if($setDatas[$key]['record_answer'] == $answers->answer_answer) {
+    foreach($getAnswers as $keys => $answers) {
+      if($setDatas[$keys]['record_answer'] == $answers->answer_answer) {
         $countCorrect[] = $answers->answer_answer;
       }
     }
@@ -533,6 +571,17 @@ class Questions_model extends CI_Model {
       ->result();
     return $getScores;
 
+  }
+
+  function updateTitle($data = array() ) {
+    $set = [
+      'topic_title' =>  $data['title']
+    ];
+    $where =[
+      'topic_id'  =>  $data['id']
+    ];
+    $updateTitle = $this->db->where($where)->update($this->topicsTable, $set);
+    return $updateTitle;
   }
 
 }
